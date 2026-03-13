@@ -226,11 +226,12 @@ impl App {
             return;
         };
 
-        // Check for error signal from orchestrator
+        // Check for error signal from orchestrator — quit TUI so error shows in plain terminal
         if let Some(error_message) = storage.load_error() {
             self.status = OptimizationStatus::Failed {
                 message: error_message,
             };
+            self.should_quit = true;
             return;
         }
 
