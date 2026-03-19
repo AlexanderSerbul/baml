@@ -25,13 +25,17 @@ import {
   XCircle,
 } from "lucide-react";
 
-type UserRole = "bdfl" | "team" | "unset";
+type UserRole = "bdfl" | "team" | "unset" | "admin" | "shepherd" | "member";
 
 function RoleBadge({ role }: { role: UserRole }) {
-  const roleConfig = {
-    bdfl: { label: "BDFL", variant: "bdfl" as const, icon: Crown, description: "Full administrative access" },
-    team: { label: "Team", variant: "team" as const, icon: Shield, description: "Team member with management access" },
-    unset: { label: "Unset", variant: "unset" as const, icon: UserMinus, description: "No special permissions" },
+  const roleConfig: Record<UserRole, { label: string; variant: "bdfl" | "team" | "unset"; icon: typeof Crown; description: string }> = {
+    bdfl: { label: "BDFL", variant: "bdfl", icon: Crown, description: "Full administrative access" },
+    team: { label: "Team", variant: "team", icon: Shield, description: "Team member with management access" },
+    unset: { label: "Unset", variant: "unset", icon: UserMinus, description: "No special permissions" },
+    // Legacy roles
+    admin: { label: "Admin (legacy)", variant: "bdfl", icon: Crown, description: "Full administrative access (legacy role)" },
+    shepherd: { label: "Shepherd (legacy)", variant: "team", icon: Shield, description: "Team member access (legacy role)" },
+    member: { label: "Member (legacy)", variant: "unset", icon: UserMinus, description: "No special permissions (legacy role)" },
   };
 
   const config = roleConfig[role];
@@ -189,7 +193,7 @@ export default function ProfilePage() {
               <div className="p-4 border rounded-lg">
                 <RoleBadge role={user.role} />
 
-                {user.role === "bdfl" && (
+                {(user.role === "bdfl" || user.role === "admin") && (
                   <div className="mt-3 text-sm text-muted-foreground">
                     <p>As a BDFL, you have:</p>
                     <ul className="list-disc list-inside mt-2 space-y-1">
@@ -200,7 +204,7 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                {user.role === "team" && (
+                {(user.role === "team" || user.role === "shepherd") && (
                   <div className="mt-3 text-sm text-muted-foreground">
                     <p>As a Team member, you have:</p>
                     <ul className="list-disc list-inside mt-2 space-y-1">
@@ -210,7 +214,7 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                {user.role === "unset" && (
+                {(user.role === "unset" || user.role === "member") && (
                   <div className="mt-3 text-sm text-muted-foreground">
                     <p>You currently have no special permissions. Contact a Team member or BDFL to request access.</p>
                   </div>

@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, internalMutation } from "./_generated/server";
 
 /**
  * Migration: Content Model Refactor (Phase 9)
@@ -218,6 +218,122 @@ export const migrateCommentsToVersions = mutation({
     return {
       ...results,
       message: `Migration complete. Migrated ${results.commentsMigrated} comments, skipped ${results.commentsSkipped} (already had versionId).`,
+    };
+  },
+});
+
+/**
+ * Migration: User Roles Refactor
+ *
+ * This migration updates existing user roles from the old schema
+ * (admin, shepherd, member) to the new schema (bdfl, team, unset).
+ *
+ * Mapping:
+ *   admin -> bdfl
+ *   shepherd -> team
+ *   member -> unset
+ *
+ * This migration runs automatically during deployment via internalMutation.
+ * It can also be run manually:
+ *   npx convex run migrations:migrateUserRoles
+ */
+export const migrateUserRoles = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const results = {
+      usersMigrated: 0,
+      usersSkipped: 0,
+      errors: [] as string[],
+    };
+
+    const roleMapping: Record<string, "bdfl" | "team" | "unset"> = {
+      admin: "bdfl",
+      shepherd: "team",
+      member: "unset",
+    };
+
+    const users = await ctx.db.query("users").collect();
+
+    for (const user of users) {
+      try {
+        const oldRole = user.role as string;
+
+        // Check if already using new role
+        if (oldRole === "bdfl" || oldRole === "team" || oldRole === "unset") {
+          results.usersSkipped++;
+          continue;
+        }
+
+        // Map old role to new role
+        const newRole = roleMapping[oldRole];
+        if (!newRole) {
+          results.errors.push(`User ${user._id}: Unknown role "${oldRole}", defaulting to "unset"`);
+          await ctx.db.patch(user._id, { role: "unset" });
+          results.usersMigrated++;
+          continue;
+        }
+
+        await ctx.db.patch(user._id, { role: newRole });
+        results.usersMigrated++;
+      } catch (error) {
+        results.errors.push(`User ${user._id}: ${String(error)}`);
+      }
+    }
+
+    return {
+      ...results,
+      message: `Migration complete. Migrated ${results.usersMigrated} users, skipped ${results.usersSkipped} (already using new roles).`,
+    };
+  },
+});
+
+// Public mutation for manual execution
+export const migrateUserRolesManual = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const results = {
+      usersMigrated: 0,
+      usersSkipped: 0,
+      errors: [] as string[],
+    };
+
+    const roleMapping: Record<string, "bdfl" | "team" | "unset"> = {
+      admin: "bdfl",
+      shepherd: "team",
+      member: "unset",
+    };
+
+    const users = await ctx.db.query("users").collect();
+
+    for (const user of users) {
+      try {
+        const oldRole = user.role as string;
+
+        // Check if already using new role
+        if (oldRole === "bdfl" || oldRole === "team" || oldRole === "unset") {
+          results.usersSkipped++;
+          continue;
+        }
+
+        // Map old role to new role
+        const newRole = roleMapping[oldRole];
+        if (!newRole) {
+          results.errors.push(`User ${user._id}: Unknown role "${oldRole}", defaulting to "unset"`);
+          await ctx.db.patch(user._id, { role: "unset" });
+          results.usersMigrated++;
+          continue;
+        }
+
+        await ctx.db.patch(user._id, { role: newRole });
+        results.usersMigrated++;
+      } catch (error) {
+        results.errors.push(`User ${user._id}: ${String(error)}`);
+      }
+    }
+
+    return {
+      ...results,
+      message: `Migration complete. Migrated ${results.usersMigrated} users, skipped ${results.usersSkipped} (already using new roles).`,
     };
   },
 });

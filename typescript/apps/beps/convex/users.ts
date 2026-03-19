@@ -31,6 +31,16 @@ export const list = query({
   },
 });
 
+// Helper to check if role has management permissions
+function hasManagementRole(role: string): boolean {
+  return role === "bdfl" || role === "team" || role === "admin" || role === "shepherd";
+}
+
+// Helper to check if role is BDFL-level (full admin)
+function isBdflRole(role: string): boolean {
+  return role === "bdfl" || role === "admin";
+}
+
 // List all users - requires BDFL or Team role
 export const listForManagement = query({
   args: { requesterId: v.id("users") },
@@ -40,8 +50,8 @@ export const listForManagement = query({
       throw new Error("Requester not found");
     }
 
-    // Only BDFL and Team members can view user management
-    if (requester.role !== "bdfl" && requester.role !== "team") {
+    // Only BDFL/admin and Team/shepherd members can view user management
+    if (!hasManagementRole(requester.role)) {
       throw new Error("Unauthorized: Only BDFL and Team members can view users");
     }
 
@@ -58,7 +68,7 @@ export const hasManagementPermissions = query({
     if (!user) {
       return false;
     }
-    return user.role === "bdfl" || user.role === "team";
+    return hasManagementRole(user.role);
   },
 });
 
@@ -245,13 +255,13 @@ export const updateRoleWithPermissions = mutation({
       throw new Error("Requester not found");
     }
 
-    // Only BDFL and Team members can update roles
-    if (requester.role !== "bdfl" && requester.role !== "team") {
+    // Only BDFL/admin and Team/shepherd members can update roles
+    if (!hasManagementRole(requester.role)) {
       throw new Error("Unauthorized: Only BDFL and Team members can update roles");
     }
 
     // Only BDFL can assign BDFL role
-    if (args.role === "bdfl" && requester.role !== "bdfl") {
+    if (args.role === "bdfl" && !isBdflRole(requester.role)) {
       throw new Error("Unauthorized: Only BDFL can assign the BDFL role");
     }
 
@@ -261,7 +271,7 @@ export const updateRoleWithPermissions = mutation({
     }
 
     // Cannot change the role of a BDFL unless you are also BDFL
-    if (targetUser.role === "bdfl" && requester.role !== "bdfl") {
+    if (isBdflRole(targetUser.role) && !isBdflRole(requester.role)) {
       throw new Error("Unauthorized: Only BDFL can change another BDFL's role");
     }
 

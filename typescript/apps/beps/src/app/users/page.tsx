@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Users, Shield, Crown, UserMinus } from "lucide-react";
 
-type UserRole = "bdfl" | "team" | "unset";
+type UserRole = "bdfl" | "team" | "unset" | "admin" | "shepherd" | "member";
 
 interface UserRecord {
   _id: Id<"users">;
@@ -39,10 +39,14 @@ interface UserRecord {
 }
 
 function RoleBadge({ role }: { role: UserRole }) {
-  const roleConfig = {
-    bdfl: { label: "BDFL", variant: "bdfl" as const, icon: Crown },
-    team: { label: "Team", variant: "team" as const, icon: Shield },
-    unset: { label: "Unset", variant: "unset" as const, icon: UserMinus },
+  const roleConfig: Record<UserRole, { label: string; variant: "bdfl" | "team" | "unset"; icon: typeof Crown }> = {
+    bdfl: { label: "BDFL", variant: "bdfl", icon: Crown },
+    team: { label: "Team", variant: "team", icon: Shield },
+    unset: { label: "Unset", variant: "unset", icon: UserMinus },
+    // Legacy roles - map to equivalent new roles for display
+    admin: { label: "Admin (legacy)", variant: "bdfl", icon: Crown },
+    shepherd: { label: "Shepherd (legacy)", variant: "team", icon: Shield },
+    member: { label: "Member (legacy)", variant: "unset", icon: UserMinus },
   };
 
   const config = roleConfig[role];
@@ -68,8 +72,10 @@ function UserRow({
   onRoleChange: (userId: Id<"users">, newRole: UserRole) => void;
 }) {
   const isCurrentUser = user._id === currentUserId;
-  const canEditBdfl = currentUserRole === "bdfl";
-  const canEditThisUser = canEditBdfl || user.role !== "bdfl";
+  // BDFL (or legacy admin) can edit any role
+  const canEditBdfl = currentUserRole === "bdfl" || currentUserRole === "admin";
+  // Can edit this user unless they are BDFL/admin and you are not
+  const canEditThisUser = canEditBdfl || (user.role !== "bdfl" && user.role !== "admin");
 
   return (
     <div className="flex items-center justify-between p-4 border rounded-lg bg-card">
@@ -188,7 +194,12 @@ export default function UsersPage() {
 
   const sortedUsers = users
     ? [...users].sort((a, b) => {
-        const roleOrder = { bdfl: 0, team: 1, unset: 2 };
+        // Role priority order (lower = higher priority)
+        const roleOrder: Record<UserRole, number> = { 
+          bdfl: 0, admin: 0,  // BDFL/admin at top
+          team: 1, shepherd: 1,  // Team/shepherd next
+          unset: 2, member: 2   // Unset/member last
+        };
         if (roleOrder[a.role] !== roleOrder[b.role]) {
           return roleOrder[a.role] - roleOrder[b.role];
         }
@@ -196,10 +207,11 @@ export default function UsersPage() {
       })
     : [];
 
+  // Group users - combine new and legacy roles
   const usersByRole = {
-    bdfl: sortedUsers.filter((u) => u.role === "bdfl"),
-    team: sortedUsers.filter((u) => u.role === "team"),
-    unset: sortedUsers.filter((u) => u.role === "unset"),
+    bdfl: sortedUsers.filter((u) => u.role === "bdfl" || u.role === "admin"),
+    team: sortedUsers.filter((u) => u.role === "team" || u.role === "shepherd"),
+    unset: sortedUsers.filter((u) => u.role === "unset" || u.role === "member"),
   };
 
   return (
