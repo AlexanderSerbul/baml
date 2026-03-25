@@ -89,6 +89,7 @@ class Client {
     planner_state: PlannerState,
   ) -> OrchestrationStep[] {
     match (self.retry) {
+      null => self.build_attempt_with_state(planner_state),
       r: RetryPolicy => {
         let result: OrchestrationStep[] = [];
         let current_delay = r.initial_delay_ms + 0.0;
@@ -116,7 +117,6 @@ class Client {
 
         result
       }
-      null => self.build_attempt_with_state(planner_state),
     }
   }
 
@@ -126,6 +126,13 @@ class Client {
     inherited_delay_ms: int,
   ) -> T {
     match (self.retry) {
+      null => {
+        let result: T = self.execute_once(
+          context,
+          inherited_delay_ms,
+        );
+        return result;
+      },
       r: RetryPolicy => {
         let current_delay = r.initial_delay_ms + 0.0
 
@@ -157,13 +164,6 @@ class Client {
 
         throw root.errors.DevOther { message: "All orchestration steps failed" };
       }
-      null => {
-        let result: T = self.execute_once(
-          context,
-          inherited_delay_ms,
-        );
-        return result;
-      },
     }
   }
 
