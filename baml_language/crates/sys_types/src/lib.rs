@@ -575,6 +575,8 @@ impl<T> io::IoClassLlmClient for T {
 /// Blanket impl — all types get real LLM behavior via `sys_llm` delegation.
 /// Uses new IO traits from the `io` module.
 impl<T> io::IoClassLlmPrimitiveClient for T {
+    // TODO: convert_io_primitive_client is called per method -- should resolve once
+    // and pass the PrimitiveClient through, or compose these into a single entry point.
     fn render_prompt(
         &self,
         _heap: &std::sync::Arc<BexHeap>,
@@ -584,7 +586,10 @@ impl<T> io::IoClassLlmPrimitiveClient for T {
         args: indexmap::IndexMap<String, BexExternalValue>,
         _ctx: &SysOpContext,
     ) -> SysOpOutput<io::owned::llm::PromptAst> {
-        let old_client = convert_io_primitive_client(&client);
+        let old_client = match convert_io_primitive_client(&client) {
+            Ok(c) => c,
+            Err(e) => return SysOpOutput::err(OpErrorKind::Other(e.to_string())),
+        };
         let args_ext = BexExternalValue::Map {
             key_type: baml_type::Ty::string(),
             value_type: baml_type::Ty::unknown(),
@@ -605,7 +610,10 @@ impl<T> io::IoClassLlmPrimitiveClient for T {
         prompt: io::owned::llm::PromptAst,
         _ctx: &SysOpContext,
     ) -> SysOpOutput<io::owned::llm::PromptAst> {
-        let old_client = convert_io_primitive_client(&client);
+        let old_client = match convert_io_primitive_client(&client) {
+            Ok(c) => c,
+            Err(e) => return SysOpOutput::err(OpErrorKind::Other(e.to_string())),
+        };
         let prompt_ast = unwrap_prompt_ast(&prompt);
         SysOpOutput::Ready(
             sys_llm::execute_specialize_prompt_from_owned(&old_client, prompt_ast)
@@ -622,7 +630,10 @@ impl<T> io::IoClassLlmPrimitiveClient for T {
         prompt: io::owned::llm::PromptAst,
         _ctx: &SysOpContext,
     ) -> SysOpOutput<BexExternalValue> {
-        let old_client = convert_io_primitive_client(&client);
+        let old_client = match convert_io_primitive_client(&client) {
+            Ok(c) => c,
+            Err(e) => return SysOpOutput::err(OpErrorKind::Other(e.to_string())),
+        };
         let prompt_ast = unwrap_prompt_ast(&prompt);
         SysOpOutput::Ready(
             sys_llm::execute_build_request_from_owned(&old_client, prompt_ast)
@@ -648,7 +659,10 @@ impl<T> io::IoClassLlmPrimitiveClient for T {
         type_def: baml_type::Ty,
         _ctx: &SysOpContext,
     ) -> SysOpOutput<BexExternalValue> {
-        let old_client = convert_io_primitive_client(&client);
+        let old_client = match convert_io_primitive_client(&client) {
+            Ok(c) => c,
+            Err(e) => return SysOpOutput::err(OpErrorKind::Other(e.to_string())),
+        };
         SysOpOutput::Ready(
             sys_llm::execute_parse_response_from_owned(&old_client, &response, &type_def)
                 .map(bex_external_types::AsBexExternalValue::into_bex_external_value)
@@ -732,23 +746,60 @@ fn convert_io_primitive_client(
         provider,
         options,
     }: &io::owned::llm::PrimitiveClient,
-) -> sys_llm::baml_std::PrimitiveClient {
+) -> Result<sys_llm::baml_std::PrimitiveClient, sys_llm::baml_std::ClientError> {
+    let llm_provider = std::str::FromStr::from_str(provider.as_str())
+        .map_err(|_| sys_llm::baml_std::ClientError::UnknownProvider {
+            client: name.clone(),
+            provider: provider.clone(),
+        })?;
+    let defaults = sys_llm::baml_std::PrimitiveClientOptions::provider_defaults(llm_provider);
+    let user_options = sys_llm::baml_std::PrimitiveClientOptions {
+        model: options.model.clone(),
+        max_tokens: options.max_tokens,
+        max_one_system_prompt: None,
+        allowed_role_metadata: None,
+        finish_reason_allow_list: None,
+        finish_reason_deny_list: None,
+        base_url: options.base_url.clone(),
+        default_role: options.default_role.clone(),
+        allowed_roles: options.allowed_roles.clone(),
+        remap_roles: options.remap_roles.clone(),
+        api_key: options.api_key.clone(),
+        provider_options: convert_provider_options(&options.provider_options),
+        headers: options.headers.clone(),
+        query_params: options.query_params.clone(),
+        request_body: options.request_body.clone(),
+    };
     sys_llm::baml_std::PrimitiveClient::new(
         name.clone(),
         provider.clone(),
-        sys_llm::baml_std::PrimitiveClientOptions {
-            model: options.model.clone(),
-            base_url: options.base_url.clone(),
-            default_role: options.default_role.clone(),
-            allowed_roles: options.allowed_roles.clone(),
-            remap_roles: options.remap_roles.clone(),
-            api_key: options.api_key.clone(),
-            headers: options.headers.clone(),
-            query_params: options.query_params.clone(),
-            request_body: options.request_body.clone(),
-            ..Default::default()
-        },
+        user_options.with_defaults(defaults),
     )
+}
+
+/// Convert the IO-layer `provider_options` (`BexExternalValue` representing the
+/// `AnthropicOptions | AzureOpenAiOptions | null` union) into the strongly typed
+/// `sys_llm::baml_std::ProviderOptions` enum.
+fn convert_provider_options(
+    val: &BexExternalValue,
+) -> Option<sys_llm::baml_std::ProviderOptions> {
+    if let Ok(opts) = io::owned::llm::AnthropicOptions::from_external(val.clone()) {
+        return Some(sys_llm::baml_std::ProviderOptions::Anthropic(
+            sys_llm::baml_std::AnthropicOptions {
+                anthropic_version: opts.anthropic_version,
+            },
+        ));
+    }
+    if let Ok(opts) = io::owned::llm::AzureOpenAiOptions::from_external(val.clone()) {
+        return Some(sys_llm::baml_std::ProviderOptions::AzureOpenAi(
+            sys_llm::baml_std::AzureOpenAiOptions {
+                resource_name: opts.resource_name,
+                deployment_id: opts.deployment_id,
+                api_version: opts.api_version,
+            },
+        ));
+    }
+    None
 }
 
 // ============================================================================

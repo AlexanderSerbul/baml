@@ -881,6 +881,7 @@ fn synthesize_client_new_companion(
 
     // Named PrimitiveClientOptions fields — default null
     let mut model = alloc(Expr::Null);
+    let mut max_tokens = alloc(Expr::Null);
     let mut base_url = alloc(Expr::Null);
     let mut default_role = alloc(Expr::Null);
     let mut api_key = alloc(Expr::Null);
@@ -894,6 +895,7 @@ fn synthesize_client_new_companion(
     // Provider-specific accumulators
     let mut anthropic_version: Option<ExprId> = None;
     let mut resource_name: Option<ExprId> = None;
+    let mut deployment_id: Option<ExprId> = None;
     let mut api_version: Option<ExprId> = None;
 
     // Unknown keys → request_body
@@ -913,6 +915,10 @@ fn synthesize_client_new_companion(
                     // Named scalar fields
                     "model" => {
                         model = crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
+                    }
+                    "max_tokens" => {
+                        max_tokens =
+                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
                     }
                     "base_url" => {
                         base_url =
@@ -954,6 +960,11 @@ fn synthesize_client_new_companion(
                             &opt_item, &mut alloc,
                         ));
                     }
+                    "deployment_id" => {
+                        deployment_id = Some(crate::lower_config_item::lower_config_value(
+                            &opt_item, &mut alloc,
+                        ));
+                    }
                     "api_version" => {
                         api_version = Some(crate::lower_config_item::lower_config_value(
                             &opt_item, &mut alloc,
@@ -978,13 +989,15 @@ fn synthesize_client_new_companion(
             fields: vec![(Name::new("anthropic_version"), av)],
             spreads: vec![],
         })
-    } else if resource_name.is_some() || api_version.is_some() {
+    } else if resource_name.is_some() || deployment_id.is_some() || api_version.is_some() {
         let rn = resource_name.unwrap_or_else(|| alloc(Expr::Null));
+        let did = deployment_id.unwrap_or_else(|| alloc(Expr::Null));
         let av = api_version.unwrap_or_else(|| alloc(Expr::Null));
         alloc(Expr::Object {
             type_name: Some(Name::new("baml.llm.AzureOpenAiOptions")),
             fields: vec![
                 (Name::new("resource_name"), rn),
+                (Name::new("deployment_id"), did),
                 (Name::new("api_version"), av),
             ],
             spreads: vec![],
@@ -1002,6 +1015,7 @@ fn synthesize_client_new_companion(
         type_name: Some(Name::new("baml.llm.PrimitiveClientOptions")),
         fields: vec![
             (Name::new("model"), model),
+            (Name::new("max_tokens"), max_tokens),
             (Name::new("base_url"), base_url),
             (Name::new("default_role"), default_role),
             (Name::new("allowed_roles"), allowed_roles),

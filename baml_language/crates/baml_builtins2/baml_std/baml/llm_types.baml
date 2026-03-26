@@ -227,6 +227,7 @@ class Client {
 
 class PrimitiveClientOptions {
   model string | null
+  max_tokens int | null
   base_url string | null
   default_role string | null
   allowed_roles string[] | null
@@ -241,7 +242,8 @@ class PrimitiveClientOptions {
 }
 
 class AzureOpenAiOptions {
-  resource_name string
+  resource_name string | null
+  deployment_id string | null
   api_version string
 }
 

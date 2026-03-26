@@ -26,23 +26,27 @@ async fn test_render_prompt_directly() {
     let client = sys_llm::baml_std::PrimitiveClient::new(
         "test".to_string(),
         "openai".to_string(),
-        sys_llm::baml_std::PrimitiveClientOptions {
-            default_role: Some("user".to_string()),
-            allowed_roles: Some(vec![
-                "user".to_string(),
-                "assistant".to_string(),
-                "system".to_string(),
-            ]),
-            ..Default::default()
+        {
+            let opts = sys_llm::baml_std::PrimitiveClientOptions {
+                default_role: Some("user".to_string()),
+                allowed_roles: Some(vec![
+                    "user".to_string(),
+                    "assistant".to_string(),
+                    "system".to_string(),
+                ]),
+                ..Default::default()
+            };
+            let defaults = sys_llm::baml_std::PrimitiveClientOptions::provider_defaults(sys_llm::LlmProvider::OpenAi);
+            opts.with_defaults(defaults)
         },
-    );
+    ).unwrap();
 
     let ctx = sys_llm::RenderContext {
         client: sys_llm::RenderContextClient {
             name: client.name.clone(),
             provider: client.provider.clone(),
-            default_role: client.default_role(),
-            allowed_roles: client.allowed_roles(),
+            default_role: client.default_role.clone(),
+            allowed_roles: client.allowed_roles.clone(),
         },
         output_format: sys_llm::OutputFormatContent::new(Ty::String {
             attr: TyAttr::default(),
@@ -83,23 +87,27 @@ You are a helpful assistant.
     let client = sys_llm::baml_std::PrimitiveClient::new(
         "test".to_string(),
         "openai".to_string(),
-        sys_llm::baml_std::PrimitiveClientOptions {
-            default_role: Some("user".to_string()),
-            allowed_roles: Some(vec![
-                "user".to_string(),
-                "assistant".to_string(),
-                "system".to_string(),
-            ]),
-            ..Default::default()
+        {
+            let opts = sys_llm::baml_std::PrimitiveClientOptions {
+                default_role: Some("user".to_string()),
+                allowed_roles: Some(vec![
+                    "user".to_string(),
+                    "assistant".to_string(),
+                    "system".to_string(),
+                ]),
+                ..Default::default()
+            };
+            let defaults = sys_llm::baml_std::PrimitiveClientOptions::provider_defaults(sys_llm::LlmProvider::OpenAi);
+            opts.with_defaults(defaults)
         },
-    );
+    ).unwrap();
 
     let ctx = sys_llm::RenderContext {
         client: sys_llm::RenderContextClient {
             name: client.name.clone(),
             provider: client.provider.clone(),
-            default_role: client.default_role(),
-            allowed_roles: client.allowed_roles(),
+            default_role: client.default_role.clone(),
+            allowed_roles: client.allowed_roles.clone(),
         },
         output_format: sys_llm::OutputFormatContent::new(Ty::String {
             attr: TyAttr::default(),

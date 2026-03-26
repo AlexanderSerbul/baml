@@ -26,10 +26,10 @@ pub use jinja::{
 };
 // --- Crate-internal re-exports (used by submodules via `crate::`) ---
 pub(crate) use model_features::{AllowedMetadata, ModelFeatures};
-pub(crate) use provider::LlmProvider;
 // --- Public API: only what sys_types and bex_engine tests actually use ---
 
 // Used by sys_types (From<LlmOpError> for OpErrorKind)
+pub use provider::LlmProvider;
 pub use types::LlmOpError;
 
 // ============================================================================
@@ -59,8 +59,8 @@ pub fn execute_render_prompt_from_owned(
         client: jinja::RenderContextClient {
             name: client.name.clone(),
             provider: client.provider.clone(),
-            default_role: client.default_role(),
-            allowed_roles: client.allowed_roles(),
+            default_role: client.default_role.clone(),
+            allowed_roles: client.allowed_roles.clone(),
         },
         output_format: types::OutputFormatContent::new(bex_external_types::Ty::String {
             attr: baml_type::TyAttr::default(),
@@ -79,9 +79,8 @@ pub fn execute_specialize_prompt_from_owned(
     client: &baml_std::PrimitiveClient,
     prompt: bex_vm_types::PromptAst,
 ) -> Result<bex_vm_types::PromptAst, LlmOpError> {
-    Ok(specialize_prompt::specialize_prompt_from_owned(
-        client, prompt,
-    ))
+    specialize_prompt::specialize_prompt_from_owned(client, prompt)
+        .map_err(|e| LlmOpError::Other(e.to_string()))
 }
 
 /// Build an HTTP request from a prompt given already-extracted owned types.
@@ -125,16 +124,18 @@ pub fn execute_parse_response_from_owned(
 #[cfg(test)]
 mod tests {
     use super::execute_parse_response_from_owned;
-    use crate::baml_std;
+    use crate::{LlmProvider, baml_std};
 
     fn make_client_with_options(
         options: baml_std::PrimitiveClientOptions,
     ) -> baml_std::PrimitiveClient {
-        baml_std::PrimitiveClient {
-            name: "TestClient".to_string(),
-            provider: "openai".to_string(),
-            options,
-        }
+        let defaults = baml_std::PrimitiveClientOptions::provider_defaults(LlmProvider::OpenAi);
+        baml_std::PrimitiveClient::new(
+            "TestClient".to_string(),
+            "openai".to_string(),
+            options.with_defaults(defaults),
+        )
+        .unwrap()
     }
 
     #[test]
@@ -157,7 +158,7 @@ mod tests {
         }"#;
 
         let allow_client = make_client_with_options(baml_std::PrimitiveClientOptions {
-            allowed_roles_allow_list: Some(vec!["stop".to_string()]),
+            finish_reason_allow_list: Some(vec!["stop".to_string()]),
             ..Default::default()
         });
 
@@ -182,7 +183,7 @@ mod tests {
         assert!(blocked.is_err());
 
         let deny_client = make_client_with_options(baml_std::PrimitiveClientOptions {
-            allowed_roles_deny_list: Some(vec!["length".to_string()]),
+            finish_reason_deny_list: Some(vec!["length".to_string()]),
             ..Default::default()
         });
 

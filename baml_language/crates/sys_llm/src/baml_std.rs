@@ -1,32 +1,121 @@
-// TODO: direct copy from baml_builtins2/baml_std/baml/llm_types.baml
-// later we can replace it accordingly
+use std::str::FromStr;
+
+use crate::LlmProvider;
+
+#[derive(Debug, thiserror::Error)]
+pub enum ClientError {
+    #[error("client '{client}': missing required option '{option}'")]
+    MissingOption { client: String, option: String },
+    #[error("client '{client}': unknown provider '{provider}'")]
+    UnknownProvider { client: String, provider: String },
+}
+
+#[derive(Debug)]
 pub struct PrimitiveClient {
     pub name: String,
     pub provider: String,
+    /// Fully resolved request URL (base_url + provider path suffix).
+    pub url: String,
+    /// Resolved model name (falls back to empty string).
+    pub model: String,
+    /// Resolved max_tokens (None if not set by user or provider default).
+    pub max_tokens: Option<i64>,
+    /// Resolved default role (falls back to "system").
+    pub default_role: String,
+    /// Resolved allowed roles (falls back to \["user"\]).
+    pub allowed_roles: Vec<String>,
+    /// Forward options from `request_body`, pre-converted to JSON.
+    pub(crate) extra_body: serde_json::Map<String, serde_json::Value>,
     pub(crate) options: PrimitiveClientOptions,
 }
 
 impl PrimitiveClient {
-    pub fn new(name: String, provider: String, options: PrimitiveClientOptions) -> Self {
-        Self {
+    pub fn new(
+        name: String,
+        provider: String,
+        options: PrimitiveClientOptions,
+    ) -> Result<Self, ClientError> {
+        let llm_provider =
+            LlmProvider::from_str(&provider).map_err(|_| ClientError::UnknownProvider {
+                client: name.clone(),
+                provider: provider.clone(),
+            })?;
+        let base_url = options.base_url.clone().unwrap_or_default();
+        let model = options.model.clone().unwrap_or_default();
+        let url = match llm_provider {
+            LlmProvider::AzureOpenAi => {
+                let azure = match &options.provider_options {
+                    Some(ProviderOptions::AzureOpenAi(opts)) => opts,
+                    _ => {
+                        return Err(ClientError::MissingOption {
+                            client: name,
+                            option: "api_version".into(),
+                        });
+                    }
+                };
+                let base = match (
+                    &options.base_url,
+                    &azure.resource_name,
+                    &azure.deployment_id,
+                ) {
+                    (Some(url), _, _) => url.clone(),
+                    (None, Some(rn), Some(did)) => {
+                        format!("https://{rn}.openai.azure.com/openai/deployments/{did}")
+                    }
+                    _ => {
+                        return Err(ClientError::MissingOption {
+                            client: name,
+                            option: "base_url or (resource_name + deployment_id)".into(),
+                        });
+                    }
+                };
+                format!("{base}/chat/completions?api-version={}", azure.api_version)
+            }
+            _ if base_url.is_empty() => {
+                return Err(ClientError::MissingOption {
+                    client: name,
+                    option: "base_url".into(),
+                });
+            }
+            LlmProvider::Anthropic => format!("{base_url}/v1/messages"),
+            LlmProvider::OpenAiResponses => format!("{base_url}/responses"),
+            // OpenAI-compatible providers, bedrock, strategies, etc.
+            _ => format!("{base_url}/chat/completions"),
+        };
+        let allowed_roles = options.allowed_roles.clone().unwrap_or_else(|| {
+            vec![
+                "user".to_string(),
+                "assistant".to_string(),
+                "system".to_string(),
+            ]
+        });
+        let default_role = options.default_role.clone().unwrap_or_else(|| {
+            allowed_roles
+                .first()
+                .cloned()
+                .unwrap_or_else(|| "user".to_string())
+        });
+        let max_tokens = options.max_tokens;
+        let extra_body = {
+            let mut map = serde_json::Map::new();
+            for (key, value) in &options.request_body {
+                if let Some(json_val) = crate::build_request::bex_value_to_json(value) {
+                    map.insert(key.clone(), json_val);
+                }
+            }
+            map
+        };
+        Ok(Self {
             name,
             provider,
+            url,
+            model,
+            max_tokens,
+            default_role,
+            allowed_roles,
+            extra_body,
             options,
-        }
-    }
-
-    pub fn default_role(&self) -> String {
-        self.options
-            .default_role
-            .clone()
-            .unwrap_or_else(|| "system".to_string())
-    }
-
-    pub fn allowed_roles(&self) -> Vec<String> {
-        self.options
-            .allowed_roles
-            .clone()
-            .unwrap_or_else(|| vec!["user".to_string()])
+        })
     }
 
     pub fn is_finish_reason_allowed(&self, finish_reason: Option<&str>) -> bool {
@@ -35,45 +124,161 @@ impl PrimitiveClient {
         };
         let finish_reason = &finish_reason.to_ascii_lowercase();
         match (
-            &self.options.allowed_roles_allow_list,
-            &self.options.allowed_roles_deny_list,
+            &self.options.finish_reason_allow_list,
+            &self.options.finish_reason_deny_list,
         ) {
-            (Some(allowed_roles_allow_list), None) => {
-                allowed_roles_allow_list.contains(finish_reason)
+            (Some(finish_reason_allow_list), None) => {
+                finish_reason_allow_list.contains(finish_reason)
             }
-            (None, Some(allowed_roles_deny_list)) => {
-                !allowed_roles_deny_list.contains(finish_reason)
+            (None, Some(finish_reason_deny_list)) => {
+                !finish_reason_deny_list.contains(finish_reason)
             }
-            (Some(allowed_roles_allow_list), Some(allowed_roles_deny_list)) => {
-                allowed_roles_allow_list.contains(finish_reason)
-                    && !allowed_roles_deny_list.contains(finish_reason)
+            (Some(finish_reason_allow_list), Some(finish_reason_deny_list)) => {
+                finish_reason_allow_list.contains(finish_reason)
+                    && !finish_reason_deny_list.contains(finish_reason)
             }
             (None, None) => true,
         }
     }
 }
 
-#[derive(Default)]
+/// Provider-specific options, matching the BAML schema union
+/// `AnthropicOptions | AzureOpenAiOptions | null`.
+#[derive(Clone, Debug)]
+pub enum ProviderOptions {
+    Anthropic(AnthropicOptions),
+    AzureOpenAi(AzureOpenAiOptions),
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct AnthropicOptions {
+    pub anthropic_version: Option<String>,
+}
+
+#[derive(Clone, Debug)]
+pub struct AzureOpenAiOptions {
+    pub resource_name: Option<String>,
+    pub deployment_id: Option<String>,
+    pub api_version: String,
+}
+
+#[derive(Debug, Default)]
 pub struct PrimitiveClientOptions {
     pub model: Option<String>,
+    pub max_tokens: Option<i64>,
     pub max_one_system_prompt: Option<bool>,
     pub allowed_role_metadata: Option<bex_heap::BexExternalValue>,
-    pub allowed_roles_allow_list: Option<Vec<String>>,
-    pub allowed_roles_deny_list: Option<Vec<String>>,
+    pub finish_reason_allow_list: Option<Vec<String>>,
+    pub finish_reason_deny_list: Option<Vec<String>>,
     pub base_url: Option<String>,
     pub default_role: Option<String>,
     pub allowed_roles: Option<Vec<String>>,
     pub remap_roles: Option<indexmap::IndexMap<String, String>>,
     pub api_key: Option<String>,
+    pub provider_options: Option<ProviderOptions>,
     pub headers: indexmap::IndexMap<String, String>,
     pub query_params: indexmap::IndexMap<String, String>,
-    // openai specific options
-    pub resource_name: Option<String>,
-    pub api_version: Option<String>,
-    // anthropic specific options
-    pub anthropic_version: Option<String>,
-    // request body
     pub request_body: indexmap::IndexMap<String, bex_heap::BexExternalValue>,
+}
+
+impl PrimitiveClientOptions {
+    /// Provider-specific defaults. User-specified values are merged on top.
+    pub fn provider_defaults(provider: LlmProvider) -> Self {
+        match provider {
+            LlmProvider::Anthropic => Self {
+                base_url: Some("https://api.anthropic.com".to_string()),
+                max_tokens: Some(4096),
+                provider_options: Some(ProviderOptions::Anthropic(AnthropicOptions {
+                    anthropic_version: Some("2023-06-01".to_string()),
+                })),
+                ..Default::default()
+            },
+            LlmProvider::OpenAi | LlmProvider::OpenAiGeneric | LlmProvider::OpenAiResponses => {
+                Self {
+                    base_url: Some("https://api.openai.com/v1".to_string()),
+                    default_role: Some("system".to_string()),
+                    allowed_roles: Some(vec![
+                        "system".to_string(),
+                        "user".to_string(),
+                        "assistant".to_string(),
+                    ]),
+                    ..Default::default()
+                }
+            }
+            LlmProvider::Ollama => Self {
+                base_url: Some("http://localhost:11434".to_string()),
+                default_role: Some("user".to_string()),
+                allowed_roles: Some(vec!["user".to_string(), "assistant".to_string()]),
+                ..Default::default()
+            },
+            LlmProvider::OpenRouter => Self {
+                base_url: Some("https://openrouter.ai/api".to_string()),
+                default_role: Some("system".to_string()),
+                allowed_roles: Some(vec![
+                    "system".to_string(),
+                    "user".to_string(),
+                    "assistant".to_string(),
+                ]),
+                ..Default::default()
+            },
+            LlmProvider::AzureOpenAi => Self {
+                default_role: Some("system".to_string()),
+                allowed_roles: Some(vec![
+                    "system".to_string(),
+                    "user".to_string(),
+                    "assistant".to_string(),
+                ]),
+                max_tokens: Some(4096),
+                ..Default::default()
+            },
+            LlmProvider::GoogleAi
+            | LlmProvider::VertexAi
+            | LlmProvider::AwsBedrock
+            | LlmProvider::BamlFallback
+            | LlmProvider::BamlRoundRobin => Default::default(),
+        }
+    }
+
+    /// Merge user-specified values on top of defaults. User values take precedence.
+    pub fn with_defaults(self, defaults: Self) -> Self {
+        Self {
+            model: self.model.or(defaults.model),
+            max_tokens: self.max_tokens.or(defaults.max_tokens),
+            max_one_system_prompt: self
+                .max_one_system_prompt
+                .or(defaults.max_one_system_prompt),
+            allowed_role_metadata: self
+                .allowed_role_metadata
+                .or(defaults.allowed_role_metadata),
+            finish_reason_allow_list: self
+                .finish_reason_allow_list
+                .or(defaults.finish_reason_allow_list),
+            finish_reason_deny_list: self
+                .finish_reason_deny_list
+                .or(defaults.finish_reason_deny_list),
+            base_url: self.base_url.or(defaults.base_url),
+            default_role: self.default_role.or(defaults.default_role),
+            allowed_roles: self.allowed_roles.or(defaults.allowed_roles),
+            remap_roles: self.remap_roles.or(defaults.remap_roles),
+            api_key: self.api_key.or(defaults.api_key),
+            provider_options: self.provider_options.or(defaults.provider_options),
+            headers: if self.headers.is_empty() {
+                defaults.headers
+            } else {
+                self.headers
+            },
+            query_params: if self.query_params.is_empty() {
+                defaults.query_params
+            } else {
+                self.query_params
+            },
+            request_body: if self.request_body.is_empty() {
+                defaults.request_body
+            } else {
+                self.request_body
+            },
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
