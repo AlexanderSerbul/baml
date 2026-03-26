@@ -11,9 +11,11 @@
 
 mod bedrock;
 
-use crate::LlmProvider;
-use crate::baml_std::{HttpRequest, PrimitiveClient};
-use crate::build_request::BuildRequestError;
+use crate::{
+    LlmProvider,
+    baml_std::{HttpRequest, PrimitiveClient},
+    build_request::BuildRequestError,
+};
 
 /// Central auth dispatch. Mutates `request` in place to add auth headers.
 pub(crate) async fn auth_request(

@@ -19,11 +19,13 @@ pub(crate) mod types;
 #[cfg(target_arch = "wasm32")]
 pub(crate) mod wasm;
 
-use std::future::Future;
-use std::panic::{RefUnwindSafe, UnwindSafe};
-use std::pin::Pin;
-use std::str::FromStr;
-use std::sync::Arc;
+use std::{
+    future::Future,
+    panic::{RefUnwindSafe, UnwindSafe},
+    pin::Pin,
+    str::FromStr,
+    sync::Arc,
+};
 
 use bex_external_types::BexExternalValue;
 // Used by bex_engine tests

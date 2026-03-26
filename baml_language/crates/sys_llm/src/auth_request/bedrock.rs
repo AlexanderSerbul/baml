@@ -18,9 +18,11 @@ use aws_smithy_runtime_api::{
 use aws_smithy_types::body::SdkBody;
 use indexmap::IndexMap;
 
-use crate::baml_std::{BedrockOptions, HttpRequest, PrimitiveClient, ProviderOptions};
-use crate::build_request::BuildRequestError;
-use crate::{BuildRequestCallbacks, HttpSendFn};
+use crate::{
+    BuildRequestCallbacks, HttpSendFn,
+    baml_std::{BedrockOptions, HttpRequest, PrimitiveClient, ProviderOptions},
+    build_request::BuildRequestError,
+};
 
 // ---------------------------------------------------------------------------
 // Platform helpers
