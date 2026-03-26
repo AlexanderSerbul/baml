@@ -19,11 +19,12 @@ use crate::LlmProvider;
 pub(crate) async fn build_request(
     client: &crate::baml_std::PrimitiveClient,
     prompt: bex_vm_types::PromptAst,
+    callbacks: Option<&crate::BuildRequestCallbacks>,
 ) -> Result<crate::baml_std::HttpRequest, BuildRequestError> {
     let provider = LlmProvider::from_str(&client.provider)
         .map_err(|_| BuildRequestError::UnsupportedLlmProvider(client.provider.clone()))?;
 
-    match provider {
+    let mut request = match provider {
         LlmProvider::OpenAi
         | LlmProvider::OpenAiGeneric
         | LlmProvider::AzureOpenAi
@@ -40,7 +41,15 @@ pub(crate) async fn build_request(
                 client.provider.clone(),
             ))
         }
-    }
+    }?;
+
+    // Auth is applied after body construction. Eventually this can be promoted
+    // to a standalone step in the LLM function pipeline (llm.baml) so that
+    // auth can be resolved, cached, or refreshed independently of request
+    // building.
+    crate::auth_request::auth_request(provider, &mut request, client, callbacks).await?;
+
+    Ok(request)
 }
 
 /// Extract a MIME type from a `MediaValue`, returning an error if none is set.
@@ -65,6 +74,8 @@ pub(crate) enum BuildRequestError {
     FileNotResolved(String),
     #[error("Failed to serialize request body: {0}")]
     Serialization(#[from] serde_json::Error),
+    #[error("Authorization failed: {0}")]
+    AuthorizationFailed(String),
     #[error("{0}")]
     Other(String),
 }
@@ -171,7 +182,7 @@ mod tests {
         let system_text = "Given the receipt below:\n\n```\ntest@email.com\n```\n\nAnswer in JSON using this schema:\n{\n  items: [\n    {\n      name: string,\n      description: string or null,\n      quantity: int,\n      price: float,\n    }\n  ],\n  total_cost: float or null,\n  venue: \"barisa\" or \"ox_burger\",\n}";
         let prompt = Arc::new(PromptAst::Vec(vec![msg("system", system_text)]));
 
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
 
         // Verify envelope
         assert_eq!(result.method, "POST");
@@ -219,7 +230,7 @@ mod tests {
             msg("user", "Write a nice short story about Dr. Pepper"),
         ]));
 
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
 
         assert_eq!(result.url, "https://api.openai.com/v1/chat/completions");
 
@@ -257,7 +268,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "Hello world");
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -280,7 +291,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
         assert_eq!(result.url, "https://custom.api.com/chat/completions");
     }
 
@@ -298,7 +309,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -324,7 +335,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -359,7 +370,7 @@ mod tests {
             msg("user", "Write a nice short story about Dr. Pepper"),
         ]));
 
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
 
         // Verify envelope
         assert_eq!(result.method, "POST");
@@ -402,7 +413,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "Hello");
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -439,7 +450,7 @@ mod tests {
         );
 
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
 
         assert_eq!(
             result.headers.get("anthropic-beta").unwrap(),
@@ -470,7 +481,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -494,7 +505,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).await.unwrap();
+        let result = build_request(&client, prompt, None).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,

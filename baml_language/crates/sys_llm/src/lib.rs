@@ -6,6 +6,7 @@
 //! - `specialize_prompt()` - Transform a generic `PromptAst` for a specific LLM provider
 //! - `execute_*` entry points for trait-based dispatch from `sys_types`
 
+mod auth_request;
 pub mod baml_std;
 mod build_request;
 pub(crate) mod jinja;
@@ -15,8 +16,14 @@ mod provider;
 mod render_prompt;
 mod specialize_prompt;
 pub(crate) mod types;
+#[cfg(target_arch = "wasm32")]
+pub(crate) mod wasm;
 
+use std::future::Future;
+use std::panic::{RefUnwindSafe, UnwindSafe};
+use std::pin::Pin;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use bex_external_types::BexExternalValue;
 // Used by bex_engine tests
@@ -31,6 +38,65 @@ pub(crate) use model_features::{AllowedMetadata, ModelFeatures};
 // Used by sys_types (From<LlmOpError> for OpErrorKind)
 pub use provider::LlmProvider;
 pub use types::LlmOpError;
+
+// ============================================================================
+// Callback types for IO operations (used by auth_request, especially Bedrock)
+// ============================================================================
+
+/// Response from an HTTP send callback.
+pub struct HttpSendResponse {
+    pub status_code: u16,
+    pub headers: indexmap::IndexMap<String, String>,
+    pub body: String,
+}
+
+/// Async closure that sends an HTTP request and returns a response.
+///
+/// `UnwindSafe + RefUnwindSafe` bounds are required by the AWS SDK's
+/// `HttpConnector` trait.
+pub type HttpSendFn = Arc<
+    dyn Fn(
+            baml_std::HttpRequest,
+        ) -> Pin<Box<dyn Future<Output = Result<HttpSendResponse, LlmOpError>> + Send>>
+        + Send
+        + Sync
+        + UnwindSafe
+        + RefUnwindSafe,
+>;
+
+/// Async closure that reads an environment variable by name.
+///
+/// `UnwindSafe + RefUnwindSafe` bounds are required for compatibility with
+/// the AWS SDK provider chain.
+pub type EnvReadFn = Arc<
+    dyn Fn(String) -> Pin<Box<dyn Future<Output = Result<Option<String>, LlmOpError>> + Send>>
+        + Send
+        + Sync
+        + UnwindSafe
+        + RefUnwindSafe,
+>;
+
+/// Async closure that reads a file by path, returning its raw bytes.
+///
+/// `UnwindSafe + RefUnwindSafe` bounds are required for compatibility with
+/// the AWS SDK provider chain.
+pub type FsReadFn = Arc<
+    dyn Fn(String) -> Pin<Box<dyn Future<Output = Result<Vec<u8>, LlmOpError>> + Send>>
+        + Send
+        + Sync
+        + UnwindSafe
+        + RefUnwindSafe,
+>;
+
+/// IO callbacks needed by auth_request (especially Bedrock credential resolution).
+///
+/// These bridge the BAML runtime's IO capabilities into the auth pipeline,
+/// allowing credential resolution to work on both native and WASM targets.
+pub struct BuildRequestCallbacks {
+    pub http_send: HttpSendFn,
+    pub env_read: EnvReadFn,
+    pub fs_read: FsReadFn,
+}
 
 // ============================================================================
 // Clean (owned-type) entry points for trait-based dispatch
@@ -84,11 +150,17 @@ pub fn execute_specialize_prompt_from_owned(
 }
 
 /// Build an HTTP request from a prompt given already-extracted owned types.
+///
+/// `callbacks` provides IO bridges for auth steps that need HTTP, env, or
+/// filesystem access (e.g. Bedrock SigV4 credential resolution). Pass `None`
+/// when callbacks are unavailable -- providers that need them will fall back to
+/// the native AWS SDK provider chain (native only) or return an error (WASM).
 pub async fn execute_build_request_from_owned(
     client: &baml_std::PrimitiveClient,
     prompt: bex_vm_types::PromptAst,
+    callbacks: Option<&BuildRequestCallbacks>,
 ) -> Result<baml_std::HttpRequest, LlmOpError> {
-    build_request::build_request(client, prompt)
+    build_request::build_request(client, prompt, callbacks)
         .await
         .map_err(|e| LlmOpError::Other(e.to_string()))
 }

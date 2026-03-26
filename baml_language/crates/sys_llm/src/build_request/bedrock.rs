@@ -590,6 +590,7 @@ mod tests {
                 crate::baml_std::BedrockOptions {
                     region: region.map(String::from),
                     endpoint_url: endpoint_url.map(String::from),
+                    ..Default::default()
                 },
             )),
             default_role: Some("user".to_string()),
@@ -753,7 +754,7 @@ mod tests {
             provider_options: Some(crate::baml_std::ProviderOptions::Bedrock(
                 crate::baml_std::BedrockOptions {
                     region: Some("us-east-1".to_string()),
-                    endpoint_url: None,
+                    ..Default::default()
                 },
             )),
             default_role: Some("user".to_string()),
@@ -1103,7 +1104,7 @@ mod tests {
             provider_options: Some(crate::baml_std::ProviderOptions::Bedrock(
                 crate::baml_std::BedrockOptions {
                     region: Some("us-east-1".to_string()),
-                    endpoint_url: None,
+                    ..Default::default()
                 },
             )),
             default_role: Some("user".to_string()),

@@ -175,6 +175,10 @@ pub struct AzureOpenAiOptions {
 pub struct BedrockOptions {
     pub region: Option<String>,
     pub endpoint_url: Option<String>,
+    pub access_key_id: Option<String>,
+    pub secret_access_key: Option<String>,
+    pub session_token: Option<String>,
+    pub profile: Option<String>,
 }
 
 /// Provider-specific options, matching the BAML schema union
