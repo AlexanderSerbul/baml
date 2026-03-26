@@ -879,171 +879,133 @@ fn synthesize_client_new_companion(
         id
     };
 
-    // Named PrimitiveClientOptions fields — default null
-    let mut model = alloc(Expr::Null);
-    let mut max_tokens = alloc(Expr::Null);
-    let mut base_url = alloc(Expr::Null);
-    let mut default_role = alloc(Expr::Null);
-    let mut api_key = alloc(Expr::Null);
-    let mut allowed_roles = alloc(Expr::Null);
-    let mut remap_roles = alloc(Expr::Null);
-
-    // Map fields — default empty
-    let mut headers_expr = alloc(Expr::Map { entries: vec![] });
-    let mut query_params_expr = alloc(Expr::Map { entries: vec![] });
-
-    /// Helper macro for provider-specific option groups.
+    /// Single-invocation macro for client option field groups.
     ///
-    /// - `declare`: creates `Option<ExprId>` accumulators for each field.
-    /// - `try_set`: if `$key` matches any field name, lowers and stores it,
-    ///   evaluating to `true`. Otherwise evaluates to `false`.
-    /// - `build`: constructs a typed `Expr::Object` if any field was set.
-    macro_rules! provider_opts {
-        (declare $($field:ident),+ $(,)?) => {
-            $( let mut $field: Option<ExprId> = None; )+
-        };
-        (try_set $key:expr, $opt_item:expr, $alloc:expr, $($field:ident),+ $(,)?) => {
-            match $key {
-                $( stringify!($field) => {
-                    $field = Some(crate::lower_config_item::lower_config_value(
-                        &$opt_item, &mut $alloc,
-                    ));
-                    true
-                } )+
-                _ => false,
-            }
-        };
-        (build $alloc:expr, $type_name:expr, $($field:ident),+ $(,)?) => {
-            if $( $field.is_some() )||+ {
-                // Resolve defaults before the object alloc to avoid double &mut.
-                $( let $field = $field.unwrap_or_else(|| $alloc(Expr::Null)); )+
-                Some($alloc(Expr::Object {
-                    type_name: Some(Name::new($type_name)),
-                    fields: vec![
-                        $( (Name::new(stringify!($field)), $field), )+
-                    ],
-                    spreads: vec![],
-                }))
-            } else {
-                None
-            }
-        };
-    }
+    /// Each field is listed exactly once. The macro declares variables, generates
+    /// key-routing match arms, and builds the final `Expr::Object`.
+    ///
+    /// Produces a binding `let $out: ExprId` for the `PrimitiveClientOptions` object.
+    ///
+    /// Field kinds:
+    /// - `null { field, ... }` -- top-level fields, default `Expr::Null`.
+    /// - `map { field, ... }` -- top-level fields, default empty `Expr::Map`.
+    /// - `provider "Type" => { field, ... }` -- provider-specific `Option<ExprId>`
+    ///   fields, built into a typed `Expr::Object` if any field was set.
+    macro_rules! client_options {
+        (
+            $out:ident = $alloc:ident;
+            // Top-level scalar fields (default null)
+            null { $($null_field:ident),* $(,)? }
+            // Top-level map fields (default empty map)
+            map { $($map_field:ident),* $(,)? }
+            // Provider option groups: provider "TypeName" => { field, ... }
+            $( provider $prov_type:literal => { $($prov_field:ident),+ $(,)? } )*
+        ) => {
+            // --- Declare variables ---
+            $( let mut $null_field = $alloc(Expr::Null); )*
+            $( let mut $map_field = $alloc(Expr::Map { entries: vec![] }); )*
+            $( $( let mut $prov_field: Option<ExprId> = None; )+ )*
 
-    provider_opts!(declare anthropic_version);
-    provider_opts!(declare resource_name, deployment_id, api_version);
-    provider_opts!(declare
-        region, endpoint_url, access_key_id, secret_access_key, session_token, profile,
-    );
+            let mut _request_body_entries: Vec<(ExprId, ExprId)> = vec![];
 
-    // Unknown keys -> request_body
-    let mut request_body_entries: Vec<(ExprId, ExprId)> = vec![];
-
-    // Walk the options nested block
-    if let Some(options_item) = config_block
-        .items()
-        .find(|item| item.matches_key("options"))
-    {
-        if let Some(nested) = options_item.nested_block() {
-            for opt_item in nested.items() {
-                let Some(opt_key) = opt_item.key() else {
-                    continue;
-                };
-                let key = opt_key.text();
-                match key {
-                    // Named scalar fields
-                    "model" => {
-                        model = crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    "max_tokens" => {
-                        max_tokens =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    "base_url" => {
-                        base_url =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    "default_role" => {
-                        default_role =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    "api_key" => {
-                        api_key =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    "allowed_roles" => {
-                        allowed_roles =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    "remap_roles" => {
-                        remap_roles =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    // Map fields (nested blocks)
-                    "headers" => {
-                        headers_expr =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    "query_params" => {
-                        query_params_expr =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                    }
-                    // Provider-specific keys -- try each group, fall through to request_body.
-                    _ if provider_opts!(try_set key, opt_item, alloc, anthropic_version) => {}
-                    _ if provider_opts!(try_set key, opt_item, alloc,
-                            resource_name, deployment_id, api_version) => {}
-                    _ if provider_opts!(try_set key, opt_item, alloc,
-                            region, endpoint_url, access_key_id, secret_access_key,
-                            session_token, profile) => {}
-                    // Unknown -> request_body
-                    other => {
-                        let key_expr = alloc(Expr::Literal(Literal::String(other.to_string())));
-                        let val_expr =
-                            crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
-                        request_body_entries.push((key_expr, val_expr));
+            // --- Route option keys ---
+            if let Some(options_item) = config_block
+                .items()
+                .find(|item| item.matches_key("options"))
+            {
+                if let Some(nested) = options_item.nested_block() {
+                    for opt_item in nested.items() {
+                        let Some(opt_key) = opt_item.key() else {
+                            continue;
+                        };
+                        let _key = opt_key.text();
+                        match _key {
+                            $( stringify!($null_field) => {
+                                $null_field = crate::lower_config_item::lower_config_value(
+                                    &opt_item, &mut $alloc,
+                                );
+                            } )*
+                            $( stringify!($map_field) => {
+                                $map_field = crate::lower_config_item::lower_config_value(
+                                    &opt_item, &mut $alloc,
+                                );
+                            } )*
+                            $( $( stringify!($prov_field) )|+ => {
+                                match _key {
+                                    $( stringify!($prov_field) => {
+                                        $prov_field = Some(
+                                            crate::lower_config_item::lower_config_value(
+                                                &opt_item, &mut $alloc,
+                                            ),
+                                        );
+                                    } )+
+                                    _ => unreachable!(),
+                                }
+                            } )*
+                            _other => {
+                                let _kx = $alloc(
+                                    Expr::Literal(Literal::String(_other.to_string())),
+                                );
+                                let _vx =
+                                    crate::lower_config_item::lower_config_value(
+                                        &opt_item, &mut $alloc,
+                                    );
+                                _request_body_entries.push((_kx, _vx));
+                            }
+                        }
                     }
                 }
             }
-        }
+
+            // --- Build provider_options (first group with any field set wins) ---
+            let _provider_options: ExprId = None
+                $( .or_else(|| {
+                    if $( $prov_field.is_some() )||+ {
+                        $( let $prov_field = $prov_field
+                            .unwrap_or_else(|| $alloc(Expr::Null)); )+
+                        Some($alloc(Expr::Object {
+                            type_name: Some(Name::new($prov_type)),
+                            fields: vec![
+                                $( (Name::new(stringify!($prov_field)), $prov_field), )+
+                            ],
+                            spreads: vec![],
+                        }))
+                    } else {
+                        None
+                    }
+                }) )*
+                .unwrap_or_else(|| $alloc(Expr::Null));
+
+            let _request_body = $alloc(Expr::Map {
+                entries: _request_body_entries,
+            });
+
+            let $out = $alloc(Expr::Object {
+                type_name: Some(Name::new("baml.llm.PrimitiveClientOptions")),
+                fields: vec![
+                    $( (Name::new(stringify!($null_field)), $null_field), )*
+                    (Name::new("provider_options"), _provider_options),
+                    $( (Name::new(stringify!($map_field)), $map_field), )*
+                    (Name::new("request_body"), _request_body),
+                ],
+                spreads: vec![],
+            });
+        };
     }
 
-    // Build provider_options from accumulated provider-specific keys.
-    // First match wins -- providers don't share option names.
-    let provider_options = provider_opts!(build alloc,
-            "baml.llm.AnthropicOptions", anthropic_version)
-    .or_else(|| {
-        provider_opts!(build alloc,
-            "baml.llm.AzureOpenAiOptions", resource_name, deployment_id, api_version)
-    })
-    .or_else(|| {
-        provider_opts!(build alloc,
-            "baml.llm.BedrockOptions",
-            region, endpoint_url, access_key_id, secret_access_key, session_token, profile)
-    })
-    .unwrap_or_else(|| alloc(Expr::Null));
-
-    let request_body_expr = alloc(Expr::Map {
-        entries: request_body_entries,
-    });
-
-    // PrimitiveClientOptions { ... }
-    let options_expr = alloc(Expr::Object {
-        type_name: Some(Name::new("baml.llm.PrimitiveClientOptions")),
-        fields: vec![
-            (Name::new("model"), model),
-            (Name::new("max_tokens"), max_tokens),
-            (Name::new("base_url"), base_url),
-            (Name::new("default_role"), default_role),
-            (Name::new("allowed_roles"), allowed_roles),
-            (Name::new("remap_roles"), remap_roles),
-            (Name::new("api_key"), api_key),
-            (Name::new("provider_options"), provider_options),
-            (Name::new("headers"), headers_expr),
-            (Name::new("query_params"), query_params_expr),
-            (Name::new("request_body"), request_body_expr),
-        ],
-        spreads: vec![],
-    });
+    client_options!(options_expr = alloc;
+        null {
+            model, max_tokens, temperature, top_p,
+            base_url, default_role, allowed_roles, remap_roles, api_key,
+        }
+        map { headers, query_params }
+        provider "baml.llm.AnthropicOptions" => { anthropic_version }
+        provider "baml.llm.AzureOpenAiOptions" => { resource_name, deployment_id, api_version }
+        provider "baml.llm.BedrockOptions" => {
+            region, endpoint_url, access_key_id, secret_access_key, session_token, profile,
+            stop_sequences,
+        }
+    );
 
     // PrimitiveClient { name, provider, options }
     let name_lit = alloc(Expr::Literal(Literal::String(client_name.to_string())));

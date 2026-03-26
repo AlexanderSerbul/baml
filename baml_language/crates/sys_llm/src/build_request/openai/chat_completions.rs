@@ -73,6 +73,10 @@ struct RequestBody {
     messages: Vec<ChatMessage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     max_tokens: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    temperature: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    top_p: Option<f64>,
     #[serde(flatten)]
     extra: serde_json::Map<String, serde_json::Value>,
 }
@@ -93,6 +97,8 @@ pub(crate) fn build_request(
         model: client.model.clone(),
         messages: prompt_to_openai_messages(prompt)?,
         max_tokens: client.max_tokens,
+        temperature: client.options.temperature,
+        top_p: client.options.top_p,
         extra: client.extra_body.clone(),
     };
     let body_str = serde_json::to_string(&body)?;

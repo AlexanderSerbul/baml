@@ -228,6 +228,8 @@ class Client {
 class PrimitiveClientOptions {
   model string | null
   max_tokens int | null
+  temperature float | null
+  top_p float | null
   base_url string | null
   default_role string | null
   allowed_roles string[] | null
@@ -258,6 +260,7 @@ class BedrockOptions {
   secret_access_key string | null
   session_token string | null
   profile string | null
+  stop_sequences string[] | null
 }
 
 class PrimitiveClient {

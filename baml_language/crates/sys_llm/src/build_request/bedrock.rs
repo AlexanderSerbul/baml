@@ -447,8 +447,6 @@ fn media_to_content_block(
 fn build_inference_config(
     client: &crate::baml_std::PrimitiveClient,
 ) -> Result<Option<InferenceConfiguration>, BuildRequestError> {
-    use bex_external_types::BexExternalValue;
-
     let mut builder = InferenceConfiguration::builder();
     let mut has_config = false;
 
@@ -465,30 +463,25 @@ fn build_inference_config(
     }
 
     #[allow(clippy::cast_possible_truncation)]
-    for (key, value) in &client.options.request_body {
-        match (key.as_str(), value) {
-            ("temperature", BexExternalValue::Float(v)) => {
-                builder = builder.temperature(*v as f32);
+    if let Some(t) = client.options.temperature {
+        builder = builder.temperature(t as f32);
+        has_config = true;
+    }
+
+    #[allow(clippy::cast_possible_truncation)]
+    if let Some(p) = client.options.top_p {
+        builder = builder.top_p(p as f32);
+        has_config = true;
+    }
+
+    if let Some(crate::baml_std::ProviderOptions::Bedrock(bedrock_opts)) =
+        &client.options.provider_options
+    {
+        if let Some(seqs) = &bedrock_opts.stop_sequences {
+            if !seqs.is_empty() {
+                builder = builder.set_stop_sequences(Some(seqs.clone()));
                 has_config = true;
             }
-            ("top_p", BexExternalValue::Float(v)) => {
-                builder = builder.top_p(*v as f32);
-                has_config = true;
-            }
-            ("stop_sequences", BexExternalValue::Array { items, .. }) => {
-                let seqs: Vec<String> = items
-                    .iter()
-                    .filter_map(|v| match v {
-                        BexExternalValue::String(s) => Some(s.clone()),
-                        _ => None,
-                    })
-                    .collect();
-                if !seqs.is_empty() {
-                    builder = builder.set_stop_sequences(Some(seqs));
-                    has_config = true;
-                }
-            }
-            _ => {}
         }
     }
 
@@ -499,18 +492,11 @@ fn build_inference_config(
     }
 }
 
-/// Keys consumed by inference config or provider-level options (not forwarded
-/// as `additionalModelRequestFields`).
-const BEDROCK_SKIP_KEYS: &[&str] = &["temperature", "top_p", "stop_sequences"];
-
 fn collect_additional_fields(
     client: &crate::baml_std::PrimitiveClient,
 ) -> Option<aws_smithy_types::Document> {
     let mut fields = std::collections::HashMap::new();
     for (key, value) in &client.extra_body {
-        if BEDROCK_SKIP_KEYS.contains(&key.as_str()) {
-            continue;
-        }
         if let Some(doc) = json_value_to_document(value) {
             fields.insert(key.clone(), doc);
         }
@@ -571,9 +557,8 @@ mod tests {
         region: Option<&str>,
         endpoint_url: Option<&str>,
         model: &str,
-        extra: Vec<(&str, serde_json::Value)>,
     ) -> crate::baml_std::PrimitiveClient {
-        let mut options = crate::baml_std::PrimitiveClientOptions {
+        let options = crate::baml_std::PrimitiveClientOptions {
             model: Some(model.to_string()),
             provider_options: Some(crate::baml_std::ProviderOptions::Bedrock(
                 crate::baml_std::BedrockOptions {
@@ -590,26 +575,6 @@ mod tests {
             ]),
             ..Default::default()
         };
-        // Put inference config values into request_body.
-        for (k, v) in &extra {
-            if matches!(*k, "temperature" | "top_p" | "stop_sequences") {
-                match v {
-                    serde_json::Value::Number(n) if n.is_f64() => {
-                        options.request_body.insert(
-                            k.to_string(),
-                            bex_external_types::BexExternalValue::Float(n.as_f64().unwrap()),
-                        );
-                    }
-                    serde_json::Value::Number(n) if n.is_i64() => {
-                        options.request_body.insert(
-                            k.to_string(),
-                            bex_external_types::BexExternalValue::Int(n.as_i64().unwrap()),
-                        );
-                    }
-                    _ => {}
-                }
-            }
-        }
         let defaults = crate::baml_std::PrimitiveClientOptions::provider_defaults(
             crate::LlmProvider::AwsBedrock,
         );
@@ -626,7 +591,6 @@ mod tests {
             Some("us-east-1"),
             None,
             "anthropic.claude-3-haiku-20240307-v1:0",
-            vec![],
         )
     }
 
@@ -740,6 +704,8 @@ mod tests {
         let options = crate::baml_std::PrimitiveClientOptions {
             model: Some("anthropic.claude-3-haiku-20240307-v1:0".to_string()),
             max_tokens: Some(500),
+            temperature: Some(0.5),
+            top_p: Some(0.75),
             provider_options: Some(crate::baml_std::ProviderOptions::Bedrock(
                 crate::baml_std::BedrockOptions {
                     region: Some("us-east-1".to_string()),
@@ -751,16 +717,6 @@ mod tests {
                 "system".to_string(),
                 "user".to_string(),
                 "assistant".to_string(),
-            ]),
-            request_body: indexmap::IndexMap::from([
-                (
-                    "temperature".to_string(),
-                    bex_external_types::BexExternalValue::Float(0.5),
-                ),
-                (
-                    "top_p".to_string(),
-                    bex_external_types::BexExternalValue::Float(0.75),
-                ),
             ]),
             ..Default::default()
         };
@@ -804,7 +760,6 @@ mod tests {
             Some("us-east-1"),
             Some("http://localhost:4566"),
             "anthropic.claude-3-haiku-20240307-v1:0",
-            vec![],
         );
         let result = build_request(&client, &msg("user", "hi")).await.unwrap();
         assert_eq!(
@@ -1043,7 +998,6 @@ mod tests {
             Some("us-east-1"),
             Some("http://localhost:4566/"),
             "anthropic.claude-3-haiku-20240307-v1:0",
-            vec![],
         );
         let result = build_request(&client, &msg("user", "hi")).await.unwrap();
         assert_eq!(
@@ -1058,7 +1012,6 @@ mod tests {
             None,
             Some("http://localhost:4566"),
             "anthropic.claude-3-haiku-20240307-v1:0",
-            vec![],
         );
         let result = build_request(&client, &msg("user", "hi")).await.unwrap();
         assert!(result.url.starts_with("http://localhost:4566/"));

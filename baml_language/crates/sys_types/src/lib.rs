@@ -758,6 +758,8 @@ fn convert_io_primitive_client(
     let user_options = sys_llm::baml_std::PrimitiveClientOptions {
         model: options.model.clone(),
         max_tokens: options.max_tokens,
+        temperature: options.temperature,
+        top_p: options.top_p,
         max_one_system_prompt: None,
         allowed_role_metadata: None,
         finish_reason_allow_list: None,
@@ -821,6 +823,7 @@ fn convert_provider_options(val: &BexExternalValue) -> Option<sys_llm::baml_std:
                     secret_access_key: opts.secret_access_key,
                     session_token: opts.session_token,
                     profile: opts.profile,
+                    stop_sequences: opts.stop_sequences,
                 },
             ))
         }

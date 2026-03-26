@@ -174,6 +174,7 @@ pub struct BedrockOptions {
     pub secret_access_key: Option<String>,
     pub session_token: Option<String>,
     pub profile: Option<String>,
+    pub stop_sequences: Option<Vec<String>>,
 }
 
 /// Provider-specific options, matching the BAML schema union
@@ -189,6 +190,8 @@ pub enum ProviderOptions {
 pub struct PrimitiveClientOptions {
     pub model: Option<String>,
     pub max_tokens: Option<i64>,
+    pub temperature: Option<f64>,
+    pub top_p: Option<f64>,
     pub max_one_system_prompt: Option<bool>,
     pub allowed_role_metadata: Option<bex_heap::BexExternalValue>,
     pub finish_reason_allow_list: Option<Vec<String>>,
@@ -276,6 +279,8 @@ impl PrimitiveClientOptions {
         Self {
             model: self.model.or(defaults.model),
             max_tokens: self.max_tokens.or(defaults.max_tokens),
+            temperature: self.temperature.or(defaults.temperature),
+            top_p: self.top_p.or(defaults.top_p),
             max_one_system_prompt: self
                 .max_one_system_prompt
                 .or(defaults.max_one_system_prompt),
