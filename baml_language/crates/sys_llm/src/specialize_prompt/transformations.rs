@@ -549,7 +549,7 @@ mod tests {
         let result = validate_and_remap_roles(
             prompt,
             &allowed(&["system", "user", "assistant"]),
-            &Some(map),
+            Some(&map),
         )
         .unwrap();
         let expected = Arc::new(PromptAst::Vec(vec![
