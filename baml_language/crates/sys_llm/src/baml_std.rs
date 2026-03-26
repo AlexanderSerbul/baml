@@ -71,6 +71,23 @@ impl PrimitiveClient {
                 };
                 format!("{base}/chat/completions?api-version={}", azure.api_version)
             }
+            LlmProvider::AwsBedrock => {
+                let bedrock_opts = match &options.provider_options {
+                    Some(ProviderOptions::Bedrock(opts)) => opts,
+                    _ => &BedrockOptions::default(),
+                };
+                if let Some(endpoint) = &bedrock_opts.endpoint_url {
+                    format!("{endpoint}/model/{model}/converse")
+                } else if let Some(region) = &bedrock_opts.region {
+                    format!(
+                        "https://bedrock-runtime.{region}.amazonaws.com/model/{model}/converse"
+                    )
+                } else {
+                    // Region will need to be resolved later; store a placeholder.
+                    // The build_request step will error if region is still unknown.
+                    String::new()
+                }
+            }
             _ if base_url.is_empty() => {
                 return Err(ClientError::MissingOption {
                     client: name,
@@ -79,7 +96,7 @@ impl PrimitiveClient {
             }
             LlmProvider::Anthropic => format!("{base_url}/v1/messages"),
             LlmProvider::OpenAiResponses => format!("{base_url}/responses"),
-            // OpenAI-compatible providers, bedrock, strategies, etc.
+            // OpenAI-compatible providers, strategies, etc.
             _ => format!("{base_url}/chat/completions"),
         };
         let allowed_roles = options.allowed_roles.clone().unwrap_or_else(|| {
@@ -142,14 +159,6 @@ impl PrimitiveClient {
     }
 }
 
-/// Provider-specific options, matching the BAML schema union
-/// `AnthropicOptions | AzureOpenAiOptions | null`.
-#[derive(Clone, Debug)]
-pub enum ProviderOptions {
-    Anthropic(AnthropicOptions),
-    AzureOpenAi(AzureOpenAiOptions),
-}
-
 #[derive(Clone, Debug, Default)]
 pub struct AnthropicOptions {
     pub anthropic_version: Option<String>,
@@ -160,6 +169,21 @@ pub struct AzureOpenAiOptions {
     pub resource_name: Option<String>,
     pub deployment_id: Option<String>,
     pub api_version: String,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct BedrockOptions {
+    pub region: Option<String>,
+    pub endpoint_url: Option<String>,
+}
+
+/// Provider-specific options, matching the BAML schema union
+/// `AnthropicOptions | AzureOpenAiOptions | BedrockOptions | null`.
+#[derive(Clone, Debug)]
+pub enum ProviderOptions {
+    Anthropic(AnthropicOptions),
+    AzureOpenAi(AzureOpenAiOptions),
+    Bedrock(BedrockOptions),
 }
 
 #[derive(Debug, Default)]
@@ -231,9 +255,17 @@ impl PrimitiveClientOptions {
                 max_tokens: Some(4096),
                 ..Default::default()
             },
+            LlmProvider::AwsBedrock => Self {
+                default_role: Some("user".to_string()),
+                allowed_roles: Some(vec![
+                    "system".to_string(),
+                    "user".to_string(),
+                    "assistant".to_string(),
+                ]),
+                ..Default::default()
+            },
             LlmProvider::GoogleAi
             | LlmProvider::VertexAi
-            | LlmProvider::AwsBedrock
             | LlmProvider::BamlFallback
             | LlmProvider::BamlRoundRobin => Default::default(),
         }

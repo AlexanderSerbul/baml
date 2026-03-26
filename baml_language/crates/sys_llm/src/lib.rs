@@ -84,11 +84,13 @@ pub fn execute_specialize_prompt_from_owned(
 }
 
 /// Build an HTTP request from a prompt given already-extracted owned types.
-pub fn execute_build_request_from_owned(
+pub async fn execute_build_request_from_owned(
     client: &baml_std::PrimitiveClient,
     prompt: bex_vm_types::PromptAst,
 ) -> Result<baml_std::HttpRequest, LlmOpError> {
-    build_request::build_request(client, prompt).map_err(|e| LlmOpError::Other(e.to_string()))
+    build_request::build_request(client, prompt)
+        .await
+        .map_err(|e| LlmOpError::Other(e.to_string()))
 }
 
 /// Parse an LLM response and extract the return value given already-extracted owned types.

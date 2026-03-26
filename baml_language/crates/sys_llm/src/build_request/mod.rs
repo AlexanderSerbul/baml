@@ -3,6 +3,7 @@
 //! Converts a `crate::baml_std::PrimitiveClient` + `PromptAst` into a `baml.http.Request` instance.
 
 mod anthropic;
+mod bedrock;
 mod openai;
 
 use std::str::FromStr;
@@ -15,7 +16,7 @@ use crate::LlmProvider;
 ///
 /// Returns an owned `HttpRequest` matching the `baml.http.Request` class:
 /// `{ method: String, url: String, headers: Map<String, String>, body: String }`
-pub(crate) fn build_request(
+pub(crate) async fn build_request(
     client: &crate::baml_std::PrimitiveClient,
     prompt: bex_vm_types::PromptAst,
 ) -> Result<crate::baml_std::HttpRequest, BuildRequestError> {
@@ -30,9 +31,9 @@ pub(crate) fn build_request(
         | LlmProvider::OpenRouter => openai::chat_completions::build_request(client, prompt),
         LlmProvider::OpenAiResponses => openai::responses::build_request(client, prompt),
         LlmProvider::Anthropic => anthropic::build_request(client, prompt),
+        LlmProvider::AwsBedrock => bedrock::build_request(client, prompt).await,
         LlmProvider::GoogleAi
         | LlmProvider::VertexAi
-        | LlmProvider::AwsBedrock
         | LlmProvider::BamlFallback
         | LlmProvider::BamlRoundRobin => {
             Err(BuildRequestError::UnsupportedLlmProvider(
@@ -64,6 +65,8 @@ pub(crate) enum BuildRequestError {
     FileNotResolved(String),
     #[error("Failed to serialize request body: {0}")]
     Serialization(#[from] serde_json::Error),
+    #[error("{0}")]
+    Other(String),
 }
 
 /// Convert a `BexExternalValue` to a `serde_json::Value`.
@@ -154,8 +157,8 @@ mod tests {
     // ========================================================================
 
     /// Matches `test_expose_request_gpt4` from `test_request.py`.
-    #[test]
-    fn test_openai_gpt4o_system_only() {
+    #[tokio::test]
+    async fn test_openai_gpt4o_system_only() {
         let client = make_client(
             "openai",
             crate::baml_std::PrimitiveClientOptions {
@@ -168,7 +171,7 @@ mod tests {
         let system_text = "Given the receipt below:\n\n```\ntest@email.com\n```\n\nAnswer in JSON using this schema:\n{\n  items: [\n    {\n      name: string,\n      description: string or null,\n      quantity: int,\n      price: float,\n    }\n  ],\n  total_cost: float or null,\n  venue: \"barisa\" or \"ox_burger\",\n}";
         let prompt = Arc::new(PromptAst::Vec(vec![msg("system", system_text)]));
 
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
 
         // Verify envelope
         assert_eq!(result.method, "POST");
@@ -200,8 +203,8 @@ mod tests {
     }
 
     /// Matches `test_expose_request_fallback` from `test_request.py`.
-    #[test]
-    fn test_openai_gpt4_turbo_system_and_user() {
+    #[tokio::test]
+    async fn test_openai_gpt4_turbo_system_and_user() {
         let client = make_client(
             "openai",
             crate::baml_std::PrimitiveClientOptions {
@@ -216,7 +219,7 @@ mod tests {
             msg("user", "Write a nice short story about Dr. Pepper"),
         ]));
 
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
 
         assert_eq!(result.url, "https://api.openai.com/v1/chat/completions");
 
@@ -244,8 +247,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_openai_content_always_array() {
+    #[tokio::test]
+    async fn test_openai_content_always_array() {
         let client = make_client(
             "openai",
             crate::baml_std::PrimitiveClientOptions {
@@ -254,7 +257,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "Hello world");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -267,8 +270,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_openai_custom_base_url() {
+    #[tokio::test]
+    async fn test_openai_custom_base_url() {
         let client = make_client(
             "openai",
             crate::baml_std::PrimitiveClientOptions {
@@ -277,12 +280,12 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
         assert_eq!(result.url, "https://custom.api.com/chat/completions");
     }
 
-    #[test]
-    fn test_openai_forwards_options_to_body() {
+    #[tokio::test]
+    async fn test_openai_forwards_options_to_body() {
         let client = make_client(
             "openai",
             crate::baml_std::PrimitiveClientOptions {
@@ -295,7 +298,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -309,8 +312,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_openai_skips_internal_options_in_body() {
+    #[tokio::test]
+    async fn test_openai_skips_internal_options_in_body() {
         let client = make_client(
             "openai",
             crate::baml_std::PrimitiveClientOptions {
@@ -321,7 +324,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -339,8 +342,8 @@ mod tests {
     // ========================================================================
 
     /// Matches `test_expose_request_round_robin` from `test_request.py`.
-    #[test]
-    fn test_anthropic_claude_system_extracted() {
+    #[tokio::test]
+    async fn test_anthropic_claude_system_extracted() {
         let client = make_client(
             "anthropic",
             crate::baml_std::PrimitiveClientOptions {
@@ -356,7 +359,7 @@ mod tests {
             msg("user", "Write a nice short story about Dr. Pepper"),
         ]));
 
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
 
         // Verify envelope
         assert_eq!(result.method, "POST");
@@ -388,8 +391,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_anthropic_no_system_message() {
+    #[tokio::test]
+    async fn test_anthropic_no_system_message() {
         let client = make_client(
             "anthropic",
             crate::baml_std::PrimitiveClientOptions {
@@ -399,7 +402,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "Hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -413,8 +416,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_anthropic_custom_headers() {
+    #[tokio::test]
+    async fn test_anthropic_custom_headers() {
         let client = make_client(
             "anthropic",
             crate::baml_std::PrimitiveClientOptions {
@@ -436,7 +439,7 @@ mod tests {
         );
 
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
 
         assert_eq!(
             result.headers.get("anthropic-beta").unwrap(),
@@ -456,8 +459,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_anthropic_forwards_max_tokens() {
+    #[tokio::test]
+    async fn test_anthropic_forwards_max_tokens() {
         let client = make_client(
             "anthropic",
             crate::baml_std::PrimitiveClientOptions {
@@ -467,7 +470,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,
@@ -481,8 +484,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_anthropic_default_max_tokens_when_not_set() {
+    #[tokio::test]
+    async fn test_anthropic_default_max_tokens_when_not_set() {
         let client = make_client(
             "anthropic",
             crate::baml_std::PrimitiveClientOptions {
@@ -491,7 +494,7 @@ mod tests {
             },
         );
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, prompt).await.unwrap();
         let body = parse_body(&result);
         assert_eq!(
             body,

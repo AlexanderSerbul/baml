@@ -635,8 +635,9 @@ impl<T> io::IoClassLlmPrimitiveClient for T {
             Err(e) => return SysOpOutput::err(OpErrorKind::Other(e.to_string())),
         };
         let prompt_ast = unwrap_prompt_ast(&prompt);
-        SysOpOutput::Ready(
+        SysOpOutput::async_op(async move {
             sys_llm::execute_build_request_from_owned(&old_client, prompt_ast)
+                .await
                 .map(|req| {
                     io::owned::http::Request {
                         method: req.method,
@@ -646,8 +647,8 @@ impl<T> io::IoClassLlmPrimitiveClient for T {
                     }
                     .into_bex_external_value()
                 })
-                .map_err(OpErrorKind::from),
-        )
+                .map_err(OpErrorKind::from)
+        })
     }
 
     fn parse(
