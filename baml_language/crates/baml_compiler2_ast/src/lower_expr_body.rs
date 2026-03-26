@@ -69,6 +69,9 @@ struct LoweringContext {
     source_map: AstSourceMap,
     /// All names used, for generating unique synthetic variable names.
     names_in_scope: std::collections::HashSet<String>,
+    /// Expressions that contain unwrapped `?.` operators and need an `OptionalChain` wrapper.
+    /// Propagated up through chain-continuing nodes (FieldAccess, Index, Call, Optional*).
+    needs_chain_wrap: std::collections::HashSet<ExprId>,
 }
 
 impl LoweringContext {
@@ -82,6 +85,7 @@ impl LoweringContext {
             type_annotations: Arena::new(),
             source_map: AstSourceMap::new(),
             names_in_scope: std::collections::HashSet::new(),
+            needs_chain_wrap: std::collections::HashSet::new(),
         }
     }
 
@@ -261,7 +265,24 @@ impl LoweringContext {
         )
     }
 
+    /// General entry point — wraps any unwrapped optional chain.
     fn lower_expr(&mut self, node: &SyntaxNode) -> ExprId {
+        let id = self.lower_expr_inner(node);
+        if self.needs_chain_wrap.remove(&id) {
+            self.alloc_expr(Expr::OptionalChain { expr: id }, node.text_range())
+        } else {
+            id
+        }
+    }
+
+    /// Chain-internal entry point — does NOT wrap.
+    /// Used by chain-continuing handlers (FieldAccess, Index, Call, Optional*)
+    /// when lowering their base/callee child.
+    fn lower_expr_in_chain(&mut self, node: &SyntaxNode) -> ExprId {
+        self.lower_expr_inner(node)
+    }
+
+    fn lower_expr_inner(&mut self, node: &SyntaxNode) -> ExprId {
         match node.kind() {
             SyntaxKind::BINARY_EXPR => self.lower_binary_expr(node),
             SyntaxKind::UNARY_EXPR => self.lower_unary_expr(node),
@@ -279,8 +300,11 @@ impl LoweringContext {
             }
             SyntaxKind::PATH_EXPR => self.lower_path_expr(node),
             SyntaxKind::FIELD_ACCESS_EXPR => self.lower_field_access_expr(node),
+            SyntaxKind::OPTIONAL_FIELD_ACCESS_EXPR => self.lower_optional_field_access_expr(node),
             SyntaxKind::ENV_ACCESS_EXPR => self.lower_env_access_expr(node),
             SyntaxKind::INDEX_EXPR => self.lower_index_expr(node),
+            SyntaxKind::OPTIONAL_INDEX_EXPR => self.lower_optional_index_expr(node),
+            SyntaxKind::OPTIONAL_CALL_EXPR => self.lower_optional_call_expr(node),
             SyntaxKind::PAREN_EXPR => {
                 if let Some(inner) = node.children().next() {
                     self.lower_expr(&inner)
@@ -342,6 +366,13 @@ impl LoweringContext {
                         SyntaxKind::LESS_LESS => op = Some(BinaryOp::Shl),
                         SyntaxKind::GREATER_GREATER => op = Some(BinaryOp::Shr),
                         SyntaxKind::KW_INSTANCEOF => op = Some(BinaryOp::Instanceof),
+                        SyntaxKind::QUESTION_QUESTION => op = Some(BinaryOp::NullCoalesce),
+                        SyntaxKind::QUESTION if op.is_none() => {
+                            // Two consecutive QUESTION tokens = null coalescing (??)
+                            // The parser emits them as two separate tokens in BINARY_EXPR.
+                            // First QUESTION sets a provisional op; second one confirms.
+                            op = Some(BinaryOp::NullCoalesce);
+                        }
                         SyntaxKind::INTEGER_LITERAL => {
                             let value = token.text().parse::<i64>().unwrap_or(0);
                             let expr_id = self.alloc_expr(Expr::Literal(Literal::Int(value)), span);
@@ -1236,7 +1267,7 @@ impl LoweringContext {
         let callee_node = node.children().find(|n| n.kind() != SyntaxKind::CALL_ARGS);
 
         let callee = if let Some(n) = callee_node {
-            self.lower_expr(&n)
+            self.lower_expr_in_chain(&n)
         } else {
             // No callee node - check for an identifier token (simple function name)
             let word_token = node
@@ -1311,7 +1342,11 @@ impl LoweringContext {
             })
             .unwrap_or_default();
 
-        self.alloc_expr(Expr::Call { callee, args }, node.text_range())
+        let id = self.alloc_expr(Expr::Call { callee, args }, node.text_range());
+        if self.needs_chain_wrap.remove(&callee) {
+            self.needs_chain_wrap.insert(id);
+        }
+        id
     }
 
     fn lower_path_expr(&mut self, node: &SyntaxNode) -> ExprId {
@@ -1369,7 +1404,7 @@ impl LoweringContext {
             match elem {
                 rowan::NodeOrToken::Node(child) => {
                     if base.is_none() {
-                        base = Some(self.lower_expr(&child));
+                        base = Some(self.lower_expr_in_chain(&child));
                     }
                 }
                 rowan::NodeOrToken::Token(token) => {
@@ -1383,7 +1418,11 @@ impl LoweringContext {
         let base = base.unwrap_or_else(|| self.alloc_expr(Expr::Missing, node.text_range()));
         let field = field.unwrap_or_else(|| Name::new("_"));
 
-        self.alloc_expr(Expr::FieldAccess { base, field }, node.text_range())
+        let id = self.alloc_expr(Expr::FieldAccess { base, field }, node.text_range());
+        if self.needs_chain_wrap.remove(&base) {
+            self.needs_chain_wrap.insert(id);
+        }
+        id
     }
 
     fn lower_env_access_expr(&mut self, node: &SyntaxNode) -> ExprId {
@@ -1432,7 +1471,7 @@ impl LoweringContext {
                 rowan::NodeOrToken::Node(child) => {
                     if !seen_lbracket {
                         if base.is_none() {
-                            base = Some(self.lower_expr(&child));
+                            base = Some(self.lower_expr_in_chain(&child));
                         }
                     } else if index.is_none() {
                         index = Some(self.lower_expr(&child));
@@ -1453,7 +1492,174 @@ impl LoweringContext {
         let base = base.unwrap_or_else(|| self.alloc_expr(Expr::Missing, node.text_range()));
         let index = index.unwrap_or_else(|| self.alloc_expr(Expr::Missing, node.text_range()));
 
-        self.alloc_expr(Expr::Index { base, index }, node.text_range())
+        let id = self.alloc_expr(Expr::Index { base, index }, node.text_range());
+        if self.needs_chain_wrap.remove(&base) {
+            self.needs_chain_wrap.insert(id);
+        }
+        id
+    }
+
+    fn lower_optional_field_access_expr(&mut self, node: &SyntaxNode) -> ExprId {
+        // OPTIONAL_FIELD_ACCESS_EXPR: <base_expr> QUESTION_DOT WORD
+        // Note: base may be a Node (PATH_EXPR, CALL_EXPR, etc.) or a bare WORD token
+        // when the base is a simple identifier like `user?.name`.
+        let mut base = None;
+        let mut field = None;
+        let mut seen_question_dot = false;
+
+        for elem in node.children_with_tokens() {
+            match elem {
+                rowan::NodeOrToken::Node(child) => {
+                    if base.is_none() {
+                        base = Some(self.lower_expr_in_chain(&child));
+                    }
+                }
+                rowan::NodeOrToken::Token(token) => {
+                    if token.kind() == SyntaxKind::QUESTION_DOT {
+                        seen_question_dot = true;
+                    } else if is_ident_token(token.kind()) {
+                        if !seen_question_dot && base.is_none() {
+                            // Base is a bare WORD token (e.g. `user` in `user?.name`)
+                            base = Some(self.alloc_expr(
+                                Expr::Path(vec![Name::new(token.text())]),
+                                token.text_range(),
+                            ));
+                        } else if seen_question_dot {
+                            field = Some(Name::new(token.text()));
+                        }
+                    }
+                }
+            }
+        }
+
+        let base = base.unwrap_or_else(|| self.alloc_expr(Expr::Missing, node.text_range()));
+        let field = field.unwrap_or_else(|| Name::new("_"));
+
+        let id = self.alloc_expr(Expr::OptionalFieldAccess { base, field }, node.text_range());
+        self.needs_chain_wrap.remove(&base); // consume base's flag if any
+        self.needs_chain_wrap.insert(id); // mark ourselves
+        id
+    }
+
+    fn lower_optional_index_expr(&mut self, node: &SyntaxNode) -> ExprId {
+        // OPTIONAL_INDEX_EXPR: <base_expr> QUESTION_DOT L_BRACKET <index_expr> R_BRACKET
+        let mut base = None;
+        let mut index = None;
+        let mut seen_lbracket = false;
+
+        for elem in node.children_with_tokens() {
+            match elem {
+                rowan::NodeOrToken::Node(child) => {
+                    if !seen_lbracket {
+                        if base.is_none() {
+                            base = Some(self.lower_expr_in_chain(&child));
+                        }
+                    } else if index.is_none() {
+                        index = Some(self.lower_expr(&child));
+                    }
+                }
+                rowan::NodeOrToken::Token(token) => {
+                    if token.kind() == SyntaxKind::L_BRACKET {
+                        seen_lbracket = true;
+                    } else if !seen_lbracket && base.is_none() {
+                        base = self.try_lower_bare_token(&token);
+                    } else if seen_lbracket && index.is_none() {
+                        index = self.try_lower_bare_token(&token);
+                    }
+                }
+            }
+        }
+
+        let base = base.unwrap_or_else(|| self.alloc_expr(Expr::Missing, node.text_range()));
+        let index = index.unwrap_or_else(|| self.alloc_expr(Expr::Missing, node.text_range()));
+
+        let id = self.alloc_expr(Expr::OptionalIndex { base, index }, node.text_range());
+        self.needs_chain_wrap.remove(&base);
+        self.needs_chain_wrap.insert(id);
+        id
+    }
+
+    fn lower_optional_call_expr(&mut self, node: &SyntaxNode) -> ExprId {
+        // OPTIONAL_CALL_EXPR: <callee_expr> QUESTION_DOT CALL_ARGS
+        let callee_node = node.children().find(|n| n.kind() != SyntaxKind::CALL_ARGS);
+
+        let callee = if let Some(n) = callee_node {
+            self.lower_expr_in_chain(&n)
+        } else {
+            let word_token = node
+                .children_with_tokens()
+                .filter_map(rowan::NodeOrToken::into_token)
+                .find(|t| t.kind() == SyntaxKind::WORD);
+
+            if let Some(token) = word_token {
+                self.alloc_expr(
+                    Expr::Path(vec![Name::new(token.text())]),
+                    token.text_range(),
+                )
+            } else {
+                self.alloc_expr(Expr::Missing, node.text_range())
+            }
+        };
+
+        let args = node
+            .children()
+            .find(|n| n.kind() == SyntaxKind::CALL_ARGS)
+            .map(|args_node| {
+                let mut args = Vec::new();
+                for element in args_node.children_with_tokens() {
+                    match element {
+                        rowan::NodeOrToken::Node(child_node) => {
+                            if is_expr_node_kind(child_node.kind()) {
+                                args.push(self.lower_expr(&child_node));
+                            }
+                        }
+                        rowan::NodeOrToken::Token(token) => {
+                            let span = token.text_range();
+                            match token.kind() {
+                                SyntaxKind::INTEGER_LITERAL => {
+                                    let value = token.text().parse::<i64>().unwrap_or(0);
+                                    args.push(
+                                        self.alloc_expr(Expr::Literal(Literal::Int(value)), span),
+                                    );
+                                }
+                                SyntaxKind::FLOAT_LITERAL => {
+                                    let text = token.text().to_string();
+                                    args.push(
+                                        self.alloc_expr(Expr::Literal(Literal::Float(text)), span),
+                                    );
+                                }
+                                SyntaxKind::STRING_LITERAL | SyntaxKind::RAW_STRING_LITERAL => {
+                                    let content = strip_string_delimiters(token.text());
+                                    args.push(
+                                        self.alloc_expr(
+                                            Expr::Literal(Literal::String(content)),
+                                            span,
+                                        ),
+                                    );
+                                }
+                                SyntaxKind::WORD => {
+                                    let text = token.text();
+                                    let e = match text {
+                                        "true" => Expr::Literal(Literal::Bool(true)),
+                                        "false" => Expr::Literal(Literal::Bool(false)),
+                                        "null" => Expr::Null,
+                                        _ => Expr::Path(vec![Name::new(text)]),
+                                    };
+                                    args.push(self.alloc_expr(e, span));
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+                args
+            })
+            .unwrap_or_default();
+
+        let id = self.alloc_expr(Expr::OptionalCall { callee, args }, node.text_range());
+        self.needs_chain_wrap.remove(&callee);
+        self.needs_chain_wrap.insert(id);
+        id
     }
 
     fn lower_string_literal(&mut self, node: &SyntaxNode) -> ExprId {
@@ -2183,8 +2389,11 @@ fn is_expr_node_kind(kind: SyntaxKind) -> bool {
             | SyntaxKind::CALL_EXPR
             | SyntaxKind::PATH_EXPR
             | SyntaxKind::FIELD_ACCESS_EXPR
+            | SyntaxKind::OPTIONAL_FIELD_ACCESS_EXPR
             | SyntaxKind::ENV_ACCESS_EXPR
             | SyntaxKind::INDEX_EXPR
+            | SyntaxKind::OPTIONAL_INDEX_EXPR
+            | SyntaxKind::OPTIONAL_CALL_EXPR
             | SyntaxKind::IF_EXPR
             | SyntaxKind::MATCH_EXPR
             | SyntaxKind::CATCH_EXPR

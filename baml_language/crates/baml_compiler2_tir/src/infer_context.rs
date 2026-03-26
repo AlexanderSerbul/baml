@@ -100,6 +100,17 @@ pub enum TirTypeError {
     ExtraneousThrowsDeclaration { extra_types: Vec<String> },
     /// A type parameter could not be inferred at a call site.
     CannotInferTypeParameter { name: Name },
+    /// `?.` used on a non-nullable type.
+    UnnecessaryOptionalChaining { ty: Ty },
+    /// `??` used where the left operand is non-nullable.
+    UnnecessaryNullCoalesce { ty: Ty },
+    /// `||` used where `??` was likely intended (nullable LHS).
+    SuggestNullCoalesce { ty: Ty },
+    /// `?? null` is a no-op.
+    NullCoalesceWithNull,
+    /// Member access (`.field` or `[index]`) on a nullable type without `?.`.
+    /// Occurs when parentheses break an optional chain: `(a?.b).c`.
+    NullableMemberAccess { ty: Ty, member: String },
 }
 
 impl fmt::Display for TirTypeError {
@@ -191,6 +202,21 @@ impl fmt::Display for TirTypeError {
             ),
             TirTypeError::CannotInferTypeParameter { name } => {
                 write!(f, "cannot infer type parameter `{name}`")
+            }
+            TirTypeError::UnnecessaryOptionalChaining { ty } => {
+                write!(f, "did you mean `.` here? `{ty}` cannot be null, so `?.` does not make sense")
+            }
+            TirTypeError::UnnecessaryNullCoalesce { ty } => {
+                write!(f, "did you mean to remove `??`? `{ty}` cannot be null, so `??` does not make sense")
+            }
+            TirTypeError::SuggestNullCoalesce { ty } => {
+                write!(f, "did you mean `??` here? BAML uses `??` instead of `||` for null coalescing (type is `{ty}`)")
+            }
+            TirTypeError::NullCoalesceWithNull => {
+                write!(f, "did you mean to remove `?? null`? the value is already nullable, so `?? null` is a no-op")
+            }
+            TirTypeError::NullableMemberAccess { ty, member } => {
+                write!(f, "did you mean `?{member}` here? `{member}` is not allowed since `{ty}` can be null")
             }
         }
     }

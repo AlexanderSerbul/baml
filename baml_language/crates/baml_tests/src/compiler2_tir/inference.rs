@@ -92,7 +92,7 @@ fn binary_op_int_add() {
     insta::assert_snapshot!(render_tir(&db, file), @r"
     function user.f(a: int, b: int) -> int throws never {
       { : never
-        return a Add b : int
+        return a + b : int
       }
     }
     ");

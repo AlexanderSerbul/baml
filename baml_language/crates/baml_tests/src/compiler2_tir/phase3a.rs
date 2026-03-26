@@ -121,7 +121,7 @@ fn too_many_args() {
     insta::assert_snapshot!(render_tir(&db, file), @r"
     function user.add(a: int, b: int) -> int throws never {
       { : never
-        return a Add b : int
+        return a + b : int
       }
     }
     function user.f() -> int throws never {
@@ -143,7 +143,7 @@ fn too_few_args() {
     insta::assert_snapshot!(render_tir(&db, file), @r"
     function user.add(a: int, b: int) -> int throws never {
       { : never
-        return a Add b : int
+        return a + b : int
       }
     }
     function user.f() -> int throws never {
@@ -234,7 +234,7 @@ fn invalid_binary_op_string_minus_int() {
     insta::assert_snapshot!(render_tir(&db, file), @r#"
     function user.f() -> int throws never {
       { : never
-        return "hello" Sub 5 : unknown
+        return "hello" - 5 : unknown
       }
       !! 28..40: operator `Sub` cannot be applied to `"hello"` and `5`
     }
@@ -248,7 +248,7 @@ fn invalid_binary_op_bool_add() {
     insta::assert_snapshot!(render_tir(&db, file), @r"
     function user.f() -> int throws never {
       { : never
-        return true Add false : unknown
+        return true + false : unknown
       }
       !! 29..41: operator `Add` cannot be applied to `true` and `false`
     }
@@ -355,12 +355,11 @@ fn if_without_else_let_binding() {
             { : 5
               5 : 5
             }
-        return y : void
-        0 : unknown
+        return y ?? 0 : void
       }
       !! 36..49: `if` without `else` cannot be used as a value; add an `else` branch
-      !! 58..59: `if` without `else` cannot be used as a value; add an `else` branch
-      !! 50..59: unreachable code: 1 statement(s) after diverging statement
+      !! 58..64: did you mean to remove `??`? `void` cannot be null, so `??` does not make sense
+      !! 58..64: `if` without `else` cannot be used as a value; add an `else` branch
     }
     ");
 }
@@ -417,7 +416,7 @@ fn match_catch_all() {
         return : int
           match (x : int) : int
             y =>
-              y Add 1 : int
+              y + 1 : int
       }
     }
     ");
@@ -588,9 +587,103 @@ function f(x: A | B | null) -> string { return x.name; }"#,
     }
     function user.f(x: user.A | user.B | null) -> string throws never {
       { : never
-        return x.name : unknown
+        return x.name : (string | string)?
       }
-      !! 94..101: unresolved member: null.name
+      !! 94..101: did you mean `?.name` here? `.name` is not allowed since `user.A | user.B | null` can be null
+      !! 94..101: type mismatch: expected string, got (string | string)?
     }
     ");
+}
+
+// ── Null coalescing operator (??) ──────────────────────────────────────────
+
+#[test]
+fn null_coalesce_unwraps_optional() {
+    let mut db = make_db();
+    let file = db.add_file(
+        "test.baml",
+        "function f(x: int?) -> int { x ?? 0 }",
+    );
+    insta::assert_snapshot!(render_tir(&db, file), @r"
+    function user.f(x: int?) -> int throws never {
+      { : int | 0
+        x ?? 0 : int | 0
+      }
+    }
+    ");
+}
+
+#[test]
+fn null_coalesce_with_variable_default() {
+    let mut db = make_db();
+    let file = db.add_file(
+        "test.baml",
+        "function f(x: int?, y: int) -> int { x ?? y }",
+    );
+    insta::assert_snapshot!(render_tir(&db, file), @r"
+    function user.f(x: int?, y: int) -> int throws never {
+      { : int
+        x ?? y : int
+      }
+    }
+    ");
+}
+
+#[test]
+fn null_coalesce_with_string() {
+    let mut db = make_db();
+    let file = db.add_file(
+        "test.baml",
+        r#"function f(name: string?) -> string { let x = "Anonymous"; name ?? x }"#,
+    );
+    insta::assert_snapshot!(render_tir(&db, file), @r#"
+    function user.f(name: string?) -> string throws never {
+      { : string
+        let x = "Anonymous" : "Anonymous" -> string
+        name ?? x : string
+      }
+    }
+    "#);
+}
+
+// ── Optional chaining (?.) ─────────────────────────────────────────────────
+
+#[test]
+fn optional_field_access() {
+    let mut db = make_db();
+    let file = db.add_file(
+        "test.baml",
+        r#"
+class User { name string }
+function f(u: User?) -> string? { u?.name }
+"#,
+    );
+    insta::assert_snapshot!(render_tir(&db, file));
+}
+
+#[test]
+fn optional_chaining_with_null_coalesce() {
+    let mut db = make_db();
+    let file = db.add_file(
+        "test.baml",
+        r#"
+class User { name string }
+function f(u: User?, fallback: string) -> string { u?.name ?? fallback }
+"#,
+    );
+    insta::assert_snapshot!(render_tir(&db, file));
+}
+
+#[test]
+fn chained_optional_field_access() {
+    let mut db = make_db();
+    let file = db.add_file(
+        "test.baml",
+        r#"
+class Address { street string }
+class User { address Address? }
+function f(u: User?) -> string? { u?.address?.street }
+"#,
+    );
+    insta::assert_snapshot!(render_tir(&db, file));
 }

@@ -280,5 +280,11 @@ fn tir_type_error_to_diagnostic_id(
         TirTypeError::ThrowsContractViolation { .. } => DiagnosticId::ThrowsContractViolation,
         TirTypeError::ExtraneousThrowsDeclaration { .. } => DiagnosticId::ThrowsContractExtraneous,
         TirTypeError::CannotInferTypeParameter { .. } => DiagnosticId::UnknownType,
+        // Optional chaining diagnostics
+        TirTypeError::UnnecessaryOptionalChaining { .. } => DiagnosticId::InvalidOperator,
+        TirTypeError::UnnecessaryNullCoalesce { .. } => DiagnosticId::InvalidOperator,
+        TirTypeError::SuggestNullCoalesce { .. } => DiagnosticId::InvalidOperator,
+        TirTypeError::NullCoalesceWithNull => DiagnosticId::InvalidOperator,
+        TirTypeError::NullableMemberAccess { .. } => DiagnosticId::TypeMismatch,
     }
 }

@@ -591,6 +591,7 @@ fn render_expr_compact_ast(body: &ast::ExprBody, id: ast::ExprId) -> String {
                 ast::BinaryOp::Shl => "<<",
                 ast::BinaryOp::Shr => ">>",
                 ast::BinaryOp::Instanceof => "instanceof",
+                ast::BinaryOp::NullCoalesce => "??",
             };
             format!(
                 "{} {} {}",
@@ -609,9 +610,19 @@ fn render_expr_compact_ast(body: &ast::ExprBody, id: ast::ExprId) -> String {
         ast::Expr::FieldAccess { base, field } => {
             format!("{}.{field}", render_expr_compact_ast(body, *base))
         }
+        ast::Expr::OptionalFieldAccess { base, field } => {
+            format!("{}?.{field}", render_expr_compact_ast(body, *base))
+        }
         ast::Expr::Index { base, index } => {
             format!(
                 "{}[{}]",
+                render_expr_compact_ast(body, *base),
+                render_expr_compact_ast(body, *index)
+            )
+        }
+        ast::Expr::OptionalIndex { base, index } => {
+            format!(
+                "{}?.[{}]",
                 render_expr_compact_ast(body, *base),
                 render_expr_compact_ast(body, *index)
             )
@@ -623,6 +634,14 @@ fn render_expr_compact_ast(body: &ast::ExprBody, id: ast::ExprId) -> String {
                 .map(|a| render_expr_compact_ast(body, *a))
                 .collect();
             format!("{}({})", callee_str, args_str.join(", "))
+        }
+        ast::Expr::OptionalCall { callee, args } => {
+            let callee_str = render_expr_compact_ast(body, *callee);
+            let args_str: Vec<_> = args
+                .iter()
+                .map(|a| render_expr_compact_ast(body, *a))
+                .collect();
+            format!("{}?.({})", callee_str, args_str.join(", "))
         }
         ast::Expr::Throw { value } => format!("throw {}", render_expr_compact_ast(body, *value)),
         ast::Expr::Catch { base, clauses } => {

@@ -1,0 +1,3149 @@
+---
+source: crates/baml_tests/src/generated_tests.rs
+---
+=== MIR2 ===
+fn user.Combined(user: User?, node: Node?, items: int[]?) -> string {
+    // Locals:
+    let _0: string // _0 // return
+    let _1: User? // user // param
+    let _2: Node? // node // param
+    let _3: int[]? // items // param
+    let _4: string?
+    let _5: Address?
+    let _6: Profile?
+    let _7: bool
+    let _8: string
+    let _9: bool
+    let _10: Profile?
+    let _11: bool
+    let _12: string
+    let _13: string
+    let _14: bool
+    let _15: Address?
+    let _16: Profile?
+    let _17: bool
+    let _18: string
+    let _19: bool
+    let _20: Profile?
+    let _21: bool
+    let _22: string
+    let _23: string
+    let _24: string
+    let _25: bool
+    let _26: Node[]?
+    let _27: bool
+    let _28: string
+    let _29: bool
+    let _30: Node[]?
+    let _31: bool
+    let _32: string
+    let _33: int | 0
+    let _34: int?
+    let _35: bool
+    let _36: string
+    let _37: bool
+    let _38: string | void | "fallback" // e3
+    let _39: string | void
+    let _40: string?
+    let _41: Profile?
+    let _42: bool
+    let _43: string
+    let _44: bool
+    let _45: Profile?
+    let _46: bool
+    let _47: string
+    let _48: string
+    let _49: bool
+    let _50: void?
+    let _51: int?
+    let _52: Node?
+    let _53: map<string, Node>?
+    let _54: bool
+    let _55: string
+    let _56: bool
+    let _57: map<string, Node>?
+    let _58: bool
+    let _59: string
+    let _60: "name"
+    let _61: bool
+    let _62: Node?
+    let _63: map<string, Node>?
+    let _64: bool
+    let _65: string
+    let _66: bool
+    let _67: map<string, Node>?
+    let _68: bool
+    let _69: string
+    let _70: "name"
+    let _71: string
+    let _72: string
+    let _73: bool
+    let _74: Node?
+    let _75: Node?
+    let _76: Node[]?
+    let _77: bool
+    let _78: string
+    let _79: bool
+    let _80: Node[]?
+    let _81: bool
+    let _82: string
+    let _83: 0
+    let _84: string
+    let _85: bool
+    let _86: string
+    let _87: int?
+    let _88: bool
+    let _89: string
+    let _90: bool
+    let _91: Node?
+    let _92: bool
+    let _93: string
+    let _94: int?
+    let _95: bool
+    let _96: 0
+    let _97: bool
+    let _98: Node?
+    let _99: bool
+    let _100: string
+    let _101: bool
+    let _102: bool
+    let _103: string
+    let _104: Node?
+    let _105: Node[]?
+    let _106: bool
+    let _107: string
+    let _108: bool
+    let _109: Node[]?
+    let _110: bool
+    let _111: string
+    let _112: int | 0
+    let _113: int?
+    let _114: int[]?
+    let _115: Profile?
+    let _116: bool
+    let _117: string
+    let _118: bool
+    let _119: Profile?
+    let _120: bool
+    let _121: string
+    let _122: string
+    let _123: bool
+    let _124: int[]?
+    let _125: Profile?
+    let _126: bool
+    let _127: string
+    let _128: bool
+    let _129: Profile?
+    let _130: bool
+    let _131: string
+    let _132: string
+    let _133: 0
+    let _134: bool
+    let _135: string
+    let _136: Node?
+    let _137: Node[]?
+    let _138: Node?
+    let _139: map<string, Node>?
+    let _140: bool
+    let _141: string
+    let _142: bool
+    let _143: map<string, Node>?
+    let _144: bool
+    let _145: string
+    let _146: "first"
+    let _147: bool
+    let _148: Node?
+    let _149: map<string, Node>?
+    let _150: bool
+    let _151: string
+    let _152: bool
+    let _153: map<string, Node>?
+    let _154: bool
+    let _155: string
+    let _156: "first"
+    let _157: string
+    let _158: bool
+    let _159: Node[]?
+    let _160: Node?
+    let _161: map<string, Node>?
+    let _162: bool
+    let _163: string
+    let _164: bool
+    let _165: map<string, Node>?
+    let _166: bool
+    let _167: string
+    let _168: "first"
+    let _169: bool
+    let _170: Node?
+    let _171: map<string, Node>?
+    let _172: bool
+    let _173: string
+    let _174: bool
+    let _175: map<string, Node>?
+    let _176: bool
+    let _177: string
+    let _178: "first"
+    let _179: string
+    let _180: 0
+    let _181: string
+    let _182: map<string, Node>?
+    let _183: bool
+    let _184: string
+    let _185: bool
+    let _186: "counter"
+    let _187: string
+    let _188: int?
+    let _189: bool
+    let _190: 0
+    let _191: bool
+    let _192: map<string, Node>?
+    let _193: bool
+    let _194: string
+    let _195: bool
+    let _196: "counter"
+    let _197: string
+    let _198: int?
+    let _199: bool
+    let _200: 0
+    let _201: bool
+    let _202: Node?
+    let _203: Node?
+    let _204: Node[]?
+    let _205: bool
+    let _206: string
+    let _207: bool
+    let _208: Node[]?
+    let _209: bool
+    let _210: string
+    let _211: int | 0
+    let _212: int?
+    let _213: bool
+    let _214: string
+    let _215: bool
+    let _216: bool
+    let _217: Node?
+    let _218: Node[]?
+    let _219: bool
+    let _220: string
+    let _221: bool
+    let _222: Node[]?
+    let _223: bool
+    let _224: string
+    let _225: int | 0
+    let _226: int?
+    let _227: bool
+    let _228: string
+    let _229: bool
+    let _230: string
+    let _231: bool
+    let _232: string
+    let _233: int?
+    let _234: bool
+    let _235: string
+    let _236: bool
+
+    bb0: {
+        _7 = copy _1 == const null;
+        branch copy _7 -> [bb8, bb1];
+    }
+
+    bb1: {
+        _8 = const "profile";
+        _6 = copy _1[_8];
+        _9 = copy _6 == const null;
+        branch copy _9 -> [bb8, bb2];
+    }
+
+    bb2: {
+        _11 = copy _1 == const null;
+        branch copy _11 -> [bb8, bb3];
+    }
+
+    bb3: {
+        _12 = const "profile";
+        _10 = copy _1[_12];
+        _13 = const "address";
+        _5 = copy _10[_13];
+        _14 = copy _5 == const null;
+        branch copy _14 -> [bb8, bb4];
+    }
+
+    bb4: {
+        _17 = copy _1 == const null;
+        branch copy _17 -> [bb8, bb5];
+    }
+
+    bb5: {
+        _18 = const "profile";
+        _16 = copy _1[_18];
+        _19 = copy _16 == const null;
+        branch copy _19 -> [bb8, bb6];
+    }
+
+    bb6: {
+        _21 = copy _1 == const null;
+        branch copy _21 -> [bb8, bb7];
+    }
+
+    bb7: {
+        _22 = const "profile";
+        _20 = copy _1[_22];
+        _23 = const "address";
+        _15 = copy _20[_23];
+        _24 = const "street";
+        _4 = copy _15[_24];
+        goto -> bb9;
+    }
+
+    bb8: {
+        _4 = const null;
+        goto -> bb9;
+    }
+
+    bb9: {
+        _25 = copy _4 == const null;
+        branch copy _25 -> [bb10, bb11];
+    }
+
+    bb10: {
+        goto -> bb11;
+    }
+
+    bb11: {
+        _27 = copy _2 == const null;
+        branch copy _27 -> [bb20, bb12];
+    }
+
+    bb12: {
+        _28 = const "children";
+        _26 = copy _2[_28];
+        _29 = copy _26 == const null;
+        branch copy _29 -> [bb20, bb13];
+    }
+
+    bb13: {
+        _31 = copy _2 == const null;
+        branch copy _31 -> [bb20, bb14];
+    }
+
+    bb14: {
+        _32 = const "children";
+        _30 = copy _2[_32];
+        _35 = copy _2 == const null;
+        branch copy _35 -> [bb16, bb15];
+    }
+
+    bb15: {
+        _36 = const "value";
+        _34 = copy _2[_36];
+        goto -> bb17;
+    }
+
+    bb16: {
+        _34 = const null;
+        goto -> bb17;
+    }
+
+    bb17: {
+        _33 = copy _34;
+        _37 = copy _34 == const null;
+        branch copy _37 -> [bb18, bb19];
+    }
+
+    bb18: {
+        _33 = const 0_i64;
+        goto -> bb19;
+    }
+
+    bb19: {
+        goto -> bb21;
+    }
+
+    bb20: {
+        goto -> bb21;
+    }
+
+    bb21: {
+        _42 = copy _1 == const null;
+        branch copy _42 -> [bb25, bb22];
+    }
+
+    bb22: {
+        _43 = const "profile";
+        _41 = copy _1[_43];
+        _44 = copy _41 == const null;
+        branch copy _44 -> [bb25, bb23];
+    }
+
+    bb23: {
+        _46 = copy _1 == const null;
+        branch copy _46 -> [bb25, bb24];
+    }
+
+    bb24: {
+        _47 = const "profile";
+        _45 = copy _1[_47];
+        _48 = const "name";
+        _40 = copy _45[_48];
+        goto -> bb26;
+    }
+
+    bb25: {
+        _40 = const null;
+        goto -> bb26;
+    }
+
+    bb26: {
+        _39 = copy _40;
+        _49 = copy _40 == const null;
+        branch copy _49 -> [bb27, bb38];
+    }
+
+    bb27: {
+        _54 = copy _2 == const null;
+        branch copy _54 -> [bb36, bb28];
+    }
+
+    bb28: {
+        _55 = const "labels";
+        _53 = copy _2[_55];
+        _56 = copy _53 == const null;
+        branch copy _56 -> [bb36, bb29];
+    }
+
+    bb29: {
+        _58 = copy _2 == const null;
+        branch copy _58 -> [bb36, bb30];
+    }
+
+    bb30: {
+        _59 = const "labels";
+        _57 = copy _2[_59];
+        _60 = const "name";
+        _52 = copy _57[_60];
+        _61 = copy _52 == const null;
+        branch copy _61 -> [bb36, bb31];
+    }
+
+    bb31: {
+        _64 = copy _2 == const null;
+        branch copy _64 -> [bb36, bb32];
+    }
+
+    bb32: {
+        _65 = const "labels";
+        _63 = copy _2[_65];
+        _66 = copy _63 == const null;
+        branch copy _66 -> [bb36, bb33];
+    }
+
+    bb33: {
+        _68 = copy _2 == const null;
+        branch copy _68 -> [bb36, bb34];
+    }
+
+    bb34: {
+        _69 = const "labels";
+        _67 = copy _2[_69];
+        _70 = const "name";
+        _62 = copy _67[_70];
+        _71 = const "value";
+        _51 = copy _62[_71];
+        _72 = const "to_string";
+        _50 = copy _51[_72];
+        _39 = call copy _50() -> [bb35];
+    }
+
+    bb35: {
+        goto -> bb37;
+    }
+
+    bb36: {
+        _39 = const null;
+        goto -> bb37;
+    }
+
+    bb37: {
+        goto -> bb38;
+    }
+
+    bb38: {
+        _38 = copy _39;
+        _73 = copy _39 == const null;
+        branch copy _73 -> [bb39, bb40];
+    }
+
+    bb39: {
+        _38 = const "fallback";
+        goto -> bb40;
+    }
+
+    bb40: {
+        _77 = copy _2 == const null;
+        branch copy _77 -> [bb50, bb41];
+    }
+
+    bb41: {
+        _78 = const "children";
+        _76 = copy _2[_78];
+        _79 = copy _76 == const null;
+        branch copy _79 -> [bb50, bb42];
+    }
+
+    bb42: {
+        _81 = copy _2 == const null;
+        branch copy _81 -> [bb50, bb43];
+    }
+
+    bb43: {
+        _82 = const "children";
+        _80 = copy _2[_82];
+        _83 = const 0_i64;
+        _75 = copy _80[_83];
+        _84 = const "next";
+        _74 = copy _75[_84];
+        _85 = copy _74 == const null;
+        branch copy _85 -> [bb50, bb44];
+    }
+
+    bb44: {
+        _86 = const "value";
+        _88 = copy _1 == const null;
+        branch copy _88 -> [bb46, bb45];
+    }
+
+    bb45: {
+        _89 = const "id";
+        _87 = copy _1[_89];
+        goto -> bb47;
+    }
+
+    bb46: {
+        _87 = const null;
+        goto -> bb47;
+    }
+
+    bb47: {
+        _74[_86] = copy _87;
+        _90 = copy _87 == const null;
+        branch copy _90 -> [bb48, bb49];
+    }
+
+    bb48: {
+        _74[_86] = const 0_i64;
+        goto -> bb49;
+    }
+
+    bb49: {
+        goto -> bb51;
+    }
+
+    bb50: {
+        goto -> bb51;
+    }
+
+    bb51: {
+        _92 = copy _2 == const null;
+        branch copy _92 -> [bb58, bb52];
+    }
+
+    bb52: {
+        _93 = const "value";
+        _95 = copy _3 == const null;
+        branch copy _95 -> [bb54, bb53];
+    }
+
+    bb53: {
+        _96 = const 0_i64;
+        _94 = copy _3[_96];
+        goto -> bb55;
+    }
+
+    bb54: {
+        _94 = const null;
+        goto -> bb55;
+    }
+
+    bb55: {
+        _97 = copy _94 == const null;
+        branch copy _97 -> [bb56, bb57];
+    }
+
+    bb56: {
+        goto -> bb57;
+    }
+
+    bb57: {
+        _91[_93] = copy _2[_93] + const 1_i64;
+        goto -> bb59;
+    }
+
+    bb58: {
+        goto -> bb59;
+    }
+
+    bb59: {
+        _99 = copy _2 == const null;
+        branch copy _99 -> [bb63, bb60];
+    }
+
+    bb60: {
+        _100 = const "next";
+        _98 = copy _2[_100];
+        _101 = copy _98 == const null;
+        branch copy _101 -> [bb63, bb61];
+    }
+
+    bb61: {
+        _102 = copy _2 == const null;
+        branch copy _102 -> [bb63, bb62];
+    }
+
+    bb62: {
+        _103 = const "next";
+        goto -> bb64;
+    }
+
+    bb63: {
+        goto -> bb64;
+    }
+
+    bb64: {
+        _106 = copy _2 == const null;
+        branch copy _106 -> [bb79, bb65];
+    }
+
+    bb65: {
+        _107 = const "children";
+        _105 = copy _2[_107];
+        _108 = copy _105 == const null;
+        branch copy _108 -> [bb79, bb66];
+    }
+
+    bb66: {
+        _110 = copy _2 == const null;
+        branch copy _110 -> [bb79, bb67];
+    }
+
+    bb67: {
+        _111 = const "children";
+        _109 = copy _2[_111];
+        _116 = copy _1 == const null;
+        branch copy _116 -> [bb75, bb68];
+    }
+
+    bb68: {
+        _117 = const "profile";
+        _115 = copy _1[_117];
+        _118 = copy _115 == const null;
+        branch copy _118 -> [bb75, bb69];
+    }
+
+    bb69: {
+        _120 = copy _1 == const null;
+        branch copy _120 -> [bb75, bb70];
+    }
+
+    bb70: {
+        _121 = const "profile";
+        _119 = copy _1[_121];
+        _122 = const "scores";
+        _114 = copy _119[_122];
+        _123 = copy _114 == const null;
+        branch copy _123 -> [bb75, bb71];
+    }
+
+    bb71: {
+        _126 = copy _1 == const null;
+        branch copy _126 -> [bb75, bb72];
+    }
+
+    bb72: {
+        _127 = const "profile";
+        _125 = copy _1[_127];
+        _128 = copy _125 == const null;
+        branch copy _128 -> [bb75, bb73];
+    }
+
+    bb73: {
+        _130 = copy _1 == const null;
+        branch copy _130 -> [bb75, bb74];
+    }
+
+    bb74: {
+        _131 = const "profile";
+        _129 = copy _1[_131];
+        _132 = const "scores";
+        _124 = copy _129[_132];
+        _133 = const 0_i64;
+        _113 = copy _124[_133];
+        goto -> bb76;
+    }
+
+    bb75: {
+        _113 = const null;
+        goto -> bb76;
+    }
+
+    bb76: {
+        _112 = copy _113;
+        _134 = copy _113 == const null;
+        branch copy _134 -> [bb77, bb78];
+    }
+
+    bb77: {
+        _112 = const 0_i64;
+        goto -> bb78;
+    }
+
+    bb78: {
+        _104 = copy _109[_112];
+        _135 = const "value";
+        goto -> bb80;
+    }
+
+    bb79: {
+        goto -> bb80;
+    }
+
+    bb80: {
+        _140 = copy _2 == const null;
+        branch copy _140 -> [bb96, bb81];
+    }
+
+    bb81: {
+        _141 = const "labels";
+        _139 = copy _2[_141];
+        _142 = copy _139 == const null;
+        branch copy _142 -> [bb96, bb82];
+    }
+
+    bb82: {
+        _144 = copy _2 == const null;
+        branch copy _144 -> [bb96, bb83];
+    }
+
+    bb83: {
+        _145 = const "labels";
+        _143 = copy _2[_145];
+        _146 = const "first";
+        _138 = copy _143[_146];
+        _147 = copy _138 == const null;
+        branch copy _147 -> [bb96, bb84];
+    }
+
+    bb84: {
+        _150 = copy _2 == const null;
+        branch copy _150 -> [bb96, bb85];
+    }
+
+    bb85: {
+        _151 = const "labels";
+        _149 = copy _2[_151];
+        _152 = copy _149 == const null;
+        branch copy _152 -> [bb96, bb86];
+    }
+
+    bb86: {
+        _154 = copy _2 == const null;
+        branch copy _154 -> [bb96, bb87];
+    }
+
+    bb87: {
+        _155 = const "labels";
+        _153 = copy _2[_155];
+        _156 = const "first";
+        _148 = copy _153[_156];
+        _157 = const "children";
+        _137 = copy _148[_157];
+        _158 = copy _137 == const null;
+        branch copy _158 -> [bb96, bb88];
+    }
+
+    bb88: {
+        _162 = copy _2 == const null;
+        branch copy _162 -> [bb96, bb89];
+    }
+
+    bb89: {
+        _163 = const "labels";
+        _161 = copy _2[_163];
+        _164 = copy _161 == const null;
+        branch copy _164 -> [bb96, bb90];
+    }
+
+    bb90: {
+        _166 = copy _2 == const null;
+        branch copy _166 -> [bb96, bb91];
+    }
+
+    bb91: {
+        _167 = const "labels";
+        _165 = copy _2[_167];
+        _168 = const "first";
+        _160 = copy _165[_168];
+        _169 = copy _160 == const null;
+        branch copy _169 -> [bb96, bb92];
+    }
+
+    bb92: {
+        _172 = copy _2 == const null;
+        branch copy _172 -> [bb96, bb93];
+    }
+
+    bb93: {
+        _173 = const "labels";
+        _171 = copy _2[_173];
+        _174 = copy _171 == const null;
+        branch copy _174 -> [bb96, bb94];
+    }
+
+    bb94: {
+        _176 = copy _2 == const null;
+        branch copy _176 -> [bb96, bb95];
+    }
+
+    bb95: {
+        _177 = const "labels";
+        _175 = copy _2[_177];
+        _178 = const "first";
+        _170 = copy _175[_178];
+        _179 = const "children";
+        _159 = copy _170[_179];
+        _180 = const 0_i64;
+        _136 = copy _159[_180];
+        _181 = const "value";
+        goto -> bb97;
+    }
+
+    bb96: {
+        goto -> bb97;
+    }
+
+    bb97: {
+        _183 = copy _2 == const null;
+        branch copy _183 -> [bb105, bb98];
+    }
+
+    bb98: {
+        _184 = const "labels";
+        _182 = copy _2[_184];
+        _185 = copy _182 == const null;
+        branch copy _185 -> [bb105, bb99];
+    }
+
+    bb99: {
+        _186 = const "counter";
+        _187 = const "value";
+        _189 = copy _3 == const null;
+        branch copy _189 -> [bb101, bb100];
+    }
+
+    bb100: {
+        _190 = const 0_i64;
+        _188 = copy _3[_190];
+        goto -> bb102;
+    }
+
+    bb101: {
+        _188 = const null;
+        goto -> bb102;
+    }
+
+    bb102: {
+        _191 = copy _188 == const null;
+        branch copy _191 -> [bb103, bb104];
+    }
+
+    bb103: {
+        goto -> bb104;
+    }
+
+    bb104: {
+        _182[_186][_187] = const 0_i64 + const 1_i64;
+        goto -> bb106;
+    }
+
+    bb105: {
+        goto -> bb106;
+    }
+
+    bb106: {
+        _193 = copy _2 == const null;
+        branch copy _193 -> [bb114, bb107];
+    }
+
+    bb107: {
+        _194 = const "labels";
+        _192 = copy _2[_194];
+        _195 = copy _192 == const null;
+        branch copy _195 -> [bb114, bb108];
+    }
+
+    bb108: {
+        _196 = const "counter";
+        _197 = const "value";
+        _199 = copy _3 == const null;
+        branch copy _199 -> [bb110, bb109];
+    }
+
+    bb109: {
+        _200 = const 0_i64;
+        _198 = copy _3[_200];
+        goto -> bb111;
+    }
+
+    bb110: {
+        _198 = const null;
+        goto -> bb111;
+    }
+
+    bb111: {
+        _201 = copy _198 == const null;
+        branch copy _201 -> [bb112, bb113];
+    }
+
+    bb112: {
+        goto -> bb113;
+    }
+
+    bb113: {
+        _192[_196][_197] = copy _192[_196][_197] + const 0_i64;
+        goto -> bb115;
+    }
+
+    bb114: {
+        goto -> bb115;
+    }
+
+    bb115: {
+        _205 = copy _2 == const null;
+        branch copy _205 -> [bb139, bb116];
+    }
+
+    bb116: {
+        _206 = const "children";
+        _204 = copy _2[_206];
+        _207 = copy _204 == const null;
+        branch copy _207 -> [bb139, bb117];
+    }
+
+    bb117: {
+        _209 = copy _2 == const null;
+        branch copy _209 -> [bb139, bb118];
+    }
+
+    bb118: {
+        _210 = const "children";
+        _208 = copy _2[_210];
+        _213 = copy _2 == const null;
+        branch copy _213 -> [bb120, bb119];
+    }
+
+    bb119: {
+        _214 = const "value";
+        _212 = copy _2[_214];
+        goto -> bb121;
+    }
+
+    bb120: {
+        _212 = const null;
+        goto -> bb121;
+    }
+
+    bb121: {
+        _211 = copy _212;
+        _215 = copy _212 == const null;
+        branch copy _215 -> [bb122, bb123];
+    }
+
+    bb122: {
+        _211 = const 0_i64;
+        goto -> bb123;
+    }
+
+    bb123: {
+        _203 = copy _208[_211];
+        _216 = copy _203 == const null;
+        branch copy _216 -> [bb139, bb124];
+    }
+
+    bb124: {
+        _219 = copy _2 == const null;
+        branch copy _219 -> [bb139, bb125];
+    }
+
+    bb125: {
+        _220 = const "children";
+        _218 = copy _2[_220];
+        _221 = copy _218 == const null;
+        branch copy _221 -> [bb139, bb126];
+    }
+
+    bb126: {
+        _223 = copy _2 == const null;
+        branch copy _223 -> [bb139, bb127];
+    }
+
+    bb127: {
+        _224 = const "children";
+        _222 = copy _2[_224];
+        _227 = copy _2 == const null;
+        branch copy _227 -> [bb129, bb128];
+    }
+
+    bb128: {
+        _228 = const "value";
+        _226 = copy _2[_228];
+        goto -> bb130;
+    }
+
+    bb129: {
+        _226 = const null;
+        goto -> bb130;
+    }
+
+    bb130: {
+        _225 = copy _226;
+        _229 = copy _226 == const null;
+        branch copy _229 -> [bb131, bb132];
+    }
+
+    bb131: {
+        _225 = const 0_i64;
+        goto -> bb132;
+    }
+
+    bb132: {
+        _217 = copy _222[_225];
+        _230 = const "next";
+        _202 = copy _217[_230];
+        _231 = copy _202 == const null;
+        branch copy _231 -> [bb139, bb133];
+    }
+
+    bb133: {
+        _232 = const "value";
+        _234 = copy _2 == const null;
+        branch copy _234 -> [bb135, bb134];
+    }
+
+    bb134: {
+        _235 = const "value";
+        _233 = copy _2[_235];
+        goto -> bb136;
+    }
+
+    bb135: {
+        _233 = const null;
+        goto -> bb136;
+    }
+
+    bb136: {
+        _202[_232] = copy _233;
+        _236 = copy _233 == const null;
+        branch copy _236 -> [bb137, bb138];
+    }
+
+    bb137: {
+        _202[_232] = const 0_i64;
+        goto -> bb138;
+    }
+
+    bb138: {
+        goto -> bb140;
+    }
+
+    bb139: {
+        goto -> bb140;
+    }
+
+    bb140: {
+        _0 = copy _38;
+        goto -> bb141;
+    }
+
+    bb141: {
+        return;
+    }
+}
+
+fn user.NullCoalescing(user: User?, fallback: string, count: int) -> string {
+    // Locals:
+    let _0: string // _0 // return
+    let _1: User? // user // param
+    let _2: string // fallback // param
+    let _3: int // count // param
+    let _4: string | "Anonymous" // d1
+    let _5: string?
+    let _6: Profile?
+    let _7: bool
+    let _8: string
+    let _9: bool
+    let _10: Profile?
+    let _11: bool
+    let _12: string
+    let _13: string
+    let _14: bool
+    let _15: string | string?
+    let _16: string?
+    let _17: Profile?
+    let _18: bool
+    let _19: string
+    let _20: bool
+    let _21: Profile?
+    let _22: bool
+    let _23: string
+    let _24: string
+    let _25: bool
+    let _26: Address?
+    let _27: Profile?
+    let _28: bool
+    let _29: string
+    let _30: bool
+    let _31: Profile?
+    let _32: bool
+    let _33: string
+    let _34: string
+    let _35: bool
+    let _36: Address?
+    let _37: Profile?
+    let _38: bool
+    let _39: string
+    let _40: bool
+    let _41: Profile?
+    let _42: bool
+    let _43: string
+    let _44: string
+    let _45: string
+    let _46: bool
+    let _47: string?
+    let _48: Profile?
+    let _49: bool
+    let _50: string
+    let _51: bool
+    let _52: Profile?
+    let _53: bool
+    let _54: string
+    let _55: string
+    let _56: bool
+    let _57: string?
+    let _58: Profile?
+    let _59: bool
+    let _60: string
+    let _61: bool
+    let _62: Profile?
+    let _63: bool
+    let _64: string
+    let _65: string
+    let _66: bool
+    let _67: Address?
+    let _68: Profile?
+    let _69: bool
+    let _70: string
+    let _71: bool
+    let _72: Profile?
+    let _73: bool
+    let _74: string
+    let _75: string
+    let _76: bool
+    let _77: Address?
+    let _78: Profile?
+    let _79: bool
+    let _80: string
+    let _81: bool
+    let _82: Profile?
+    let _83: bool
+    let _84: string
+    let _85: string
+    let _86: string
+    let _87: int?
+    let _88: int[]?
+    let _89: Profile?
+    let _90: bool
+    let _91: string
+    let _92: bool
+    let _93: Profile?
+    let _94: bool
+    let _95: string
+    let _96: string
+    let _97: bool
+    let _98: int[]?
+    let _99: Profile?
+    let _100: bool
+    let _101: string
+    let _102: bool
+    let _103: Profile?
+    let _104: bool
+    let _105: string
+    let _106: string
+    let _107: 0
+    let _108: bool
+    let _109: string?
+    let _110: Profile?
+    let _111: bool
+    let _112: string
+    let _113: bool
+    let _114: Profile?
+    let _115: bool
+    let _116: string
+    let _117: string
+    let _118: bool
+    let _119: Profile?
+    let _120: bool
+    let _121: string
+    let _122: bool
+    let _123: string
+    let _124: string?
+    let _125: Address?
+    let _126: Profile?
+    let _127: bool
+    let _128: string
+    let _129: bool
+    let _130: Profile?
+    let _131: bool
+    let _132: string
+    let _133: string
+    let _134: bool
+    let _135: Address?
+    let _136: Profile?
+    let _137: bool
+    let _138: string
+    let _139: bool
+    let _140: Profile?
+    let _141: bool
+    let _142: string
+    let _143: string
+    let _144: string
+    let _145: bool
+    let _146: string?
+    let _147: Profile?
+    let _148: bool
+    let _149: string
+    let _150: bool
+    let _151: Profile?
+    let _152: bool
+    let _153: string
+    let _154: string
+    let _155: bool
+    let _156: bool
+    let _157: string?
+    let _158: Profile?
+    let _159: bool
+    let _160: string
+    let _161: bool
+    let _162: Profile?
+    let _163: bool
+    let _164: string
+    let _165: string
+    let _166: bool
+    let _167: string?
+    let _168: Profile?
+    let _169: bool
+    let _170: string
+    let _171: bool
+    let _172: Profile?
+    let _173: bool
+    let _174: string
+    let _175: string
+
+    bb0: {
+        _7 = copy _1 == const null;
+        branch copy _7 -> [bb4, bb1];
+    }
+
+    bb1: {
+        _8 = const "profile";
+        _6 = copy _1[_8];
+        _9 = copy _6 == const null;
+        branch copy _9 -> [bb4, bb2];
+    }
+
+    bb2: {
+        _11 = copy _1 == const null;
+        branch copy _11 -> [bb4, bb3];
+    }
+
+    bb3: {
+        _12 = const "profile";
+        _10 = copy _1[_12];
+        _13 = const "name";
+        _5 = copy _10[_13];
+        goto -> bb5;
+    }
+
+    bb4: {
+        _5 = const null;
+        goto -> bb5;
+    }
+
+    bb5: {
+        _4 = copy _5;
+        _14 = copy _5 == const null;
+        branch copy _14 -> [bb6, bb7];
+    }
+
+    bb6: {
+        _4 = const "Anonymous";
+        goto -> bb7;
+    }
+
+    bb7: {
+        _18 = copy _1 == const null;
+        branch copy _18 -> [bb11, bb8];
+    }
+
+    bb8: {
+        _19 = const "profile";
+        _17 = copy _1[_19];
+        _20 = copy _17 == const null;
+        branch copy _20 -> [bb11, bb9];
+    }
+
+    bb9: {
+        _22 = copy _1 == const null;
+        branch copy _22 -> [bb11, bb10];
+    }
+
+    bb10: {
+        _23 = const "profile";
+        _21 = copy _1[_23];
+        _24 = const "name";
+        _16 = copy _21[_24];
+        goto -> bb12;
+    }
+
+    bb11: {
+        _16 = const null;
+        goto -> bb12;
+    }
+
+    bb12: {
+        _15 = copy _16;
+        _25 = copy _16 == const null;
+        branch copy _25 -> [bb13, bb23];
+    }
+
+    bb13: {
+        _28 = copy _1 == const null;
+        branch copy _28 -> [bb21, bb14];
+    }
+
+    bb14: {
+        _29 = const "profile";
+        _27 = copy _1[_29];
+        _30 = copy _27 == const null;
+        branch copy _30 -> [bb21, bb15];
+    }
+
+    bb15: {
+        _32 = copy _1 == const null;
+        branch copy _32 -> [bb21, bb16];
+    }
+
+    bb16: {
+        _33 = const "profile";
+        _31 = copy _1[_33];
+        _34 = const "address";
+        _26 = copy _31[_34];
+        _35 = copy _26 == const null;
+        branch copy _35 -> [bb21, bb17];
+    }
+
+    bb17: {
+        _38 = copy _1 == const null;
+        branch copy _38 -> [bb21, bb18];
+    }
+
+    bb18: {
+        _39 = const "profile";
+        _37 = copy _1[_39];
+        _40 = copy _37 == const null;
+        branch copy _40 -> [bb21, bb19];
+    }
+
+    bb19: {
+        _42 = copy _1 == const null;
+        branch copy _42 -> [bb21, bb20];
+    }
+
+    bb20: {
+        _43 = const "profile";
+        _41 = copy _1[_43];
+        _44 = const "address";
+        _36 = copy _41[_44];
+        _45 = const "street";
+        _15 = copy _36[_45];
+        goto -> bb22;
+    }
+
+    bb21: {
+        _15 = const null;
+        goto -> bb22;
+    }
+
+    bb22: {
+        goto -> bb23;
+    }
+
+    bb23: {
+        _46 = copy _15 == const null;
+        branch copy _46 -> [bb24, bb25];
+    }
+
+    bb24: {
+        goto -> bb25;
+    }
+
+    bb25: {
+        _49 = copy _1 == const null;
+        branch copy _49 -> [bb29, bb26];
+    }
+
+    bb26: {
+        _50 = const "profile";
+        _48 = copy _1[_50];
+        _51 = copy _48 == const null;
+        branch copy _51 -> [bb29, bb27];
+    }
+
+    bb27: {
+        _53 = copy _1 == const null;
+        branch copy _53 -> [bb29, bb28];
+    }
+
+    bb28: {
+        _54 = const "profile";
+        _52 = copy _1[_54];
+        _55 = const "name";
+        _47 = copy _52[_55];
+        goto -> bb30;
+    }
+
+    bb29: {
+        _47 = const null;
+        goto -> bb30;
+    }
+
+    bb30: {
+        _56 = copy _47 == const null;
+        branch copy _56 -> [bb31, bb32];
+    }
+
+    bb31: {
+        goto -> bb32;
+    }
+
+    bb32: {
+        _59 = copy _1 == const null;
+        branch copy _59 -> [bb36, bb33];
+    }
+
+    bb33: {
+        _60 = const "profile";
+        _58 = copy _1[_60];
+        _61 = copy _58 == const null;
+        branch copy _61 -> [bb36, bb34];
+    }
+
+    bb34: {
+        _63 = copy _1 == const null;
+        branch copy _63 -> [bb36, bb35];
+    }
+
+    bb35: {
+        _64 = const "profile";
+        _62 = copy _1[_64];
+        _65 = const "name";
+        _57 = copy _62[_65];
+        goto -> bb37;
+    }
+
+    bb36: {
+        _57 = const null;
+        goto -> bb37;
+    }
+
+    bb37: {
+        _66 = copy _57 == const null;
+        branch copy _66 -> [bb38, bb48];
+    }
+
+    bb38: {
+        _69 = copy _1 == const null;
+        branch copy _69 -> [bb46, bb39];
+    }
+
+    bb39: {
+        _70 = const "profile";
+        _68 = copy _1[_70];
+        _71 = copy _68 == const null;
+        branch copy _71 -> [bb46, bb40];
+    }
+
+    bb40: {
+        _73 = copy _1 == const null;
+        branch copy _73 -> [bb46, bb41];
+    }
+
+    bb41: {
+        _74 = const "profile";
+        _72 = copy _1[_74];
+        _75 = const "address";
+        _67 = copy _72[_75];
+        _76 = copy _67 == const null;
+        branch copy _76 -> [bb46, bb42];
+    }
+
+    bb42: {
+        _79 = copy _1 == const null;
+        branch copy _79 -> [bb46, bb43];
+    }
+
+    bb43: {
+        _80 = const "profile";
+        _78 = copy _1[_80];
+        _81 = copy _78 == const null;
+        branch copy _81 -> [bb46, bb44];
+    }
+
+    bb44: {
+        _83 = copy _1 == const null;
+        branch copy _83 -> [bb46, bb45];
+    }
+
+    bb45: {
+        _84 = const "profile";
+        _82 = copy _1[_84];
+        _85 = const "address";
+        _77 = copy _82[_85];
+        _86 = const "zip";
+        goto -> bb47;
+    }
+
+    bb46: {
+        goto -> bb47;
+    }
+
+    bb47: {
+        goto -> bb48;
+    }
+
+    bb48: {
+        _90 = copy _1 == const null;
+        branch copy _90 -> [bb56, bb49];
+    }
+
+    bb49: {
+        _91 = const "profile";
+        _89 = copy _1[_91];
+        _92 = copy _89 == const null;
+        branch copy _92 -> [bb56, bb50];
+    }
+
+    bb50: {
+        _94 = copy _1 == const null;
+        branch copy _94 -> [bb56, bb51];
+    }
+
+    bb51: {
+        _95 = const "profile";
+        _93 = copy _1[_95];
+        _96 = const "scores";
+        _88 = copy _93[_96];
+        _97 = copy _88 == const null;
+        branch copy _97 -> [bb56, bb52];
+    }
+
+    bb52: {
+        _100 = copy _1 == const null;
+        branch copy _100 -> [bb56, bb53];
+    }
+
+    bb53: {
+        _101 = const "profile";
+        _99 = copy _1[_101];
+        _102 = copy _99 == const null;
+        branch copy _102 -> [bb56, bb54];
+    }
+
+    bb54: {
+        _104 = copy _1 == const null;
+        branch copy _104 -> [bb56, bb55];
+    }
+
+    bb55: {
+        _105 = const "profile";
+        _103 = copy _1[_105];
+        _106 = const "scores";
+        _98 = copy _103[_106];
+        _107 = const 0_i64;
+        _87 = copy _98[_107];
+        goto -> bb57;
+    }
+
+    bb56: {
+        _87 = const null;
+        goto -> bb57;
+    }
+
+    bb57: {
+        _108 = copy _87 == const null;
+        branch copy _108 -> [bb58, bb59];
+    }
+
+    bb58: {
+        goto -> bb59;
+    }
+
+    bb59: {
+        _111 = copy _1 == const null;
+        branch copy _111 -> [bb63, bb60];
+    }
+
+    bb60: {
+        _112 = const "profile";
+        _110 = copy _1[_112];
+        _113 = copy _110 == const null;
+        branch copy _113 -> [bb63, bb61];
+    }
+
+    bb61: {
+        _115 = copy _1 == const null;
+        branch copy _115 -> [bb63, bb62];
+    }
+
+    bb62: {
+        _116 = const "profile";
+        _114 = copy _1[_116];
+        _117 = const "name";
+        _109 = copy _114[_117];
+        goto -> bb64;
+    }
+
+    bb63: {
+        _109 = const null;
+        goto -> bb64;
+    }
+
+    bb64: {
+        _118 = copy _109 == const null;
+        branch copy _118 -> [bb65, bb66];
+    }
+
+    bb65: {
+        goto -> bb66;
+    }
+
+    bb66: {
+        _120 = copy _1 == const null;
+        branch copy _120 -> [bb80, bb67];
+    }
+
+    bb67: {
+        _121 = const "profile";
+        _119 = copy _1[_121];
+        _122 = copy _119 == const null;
+        branch copy _122 -> [bb80, bb68];
+    }
+
+    bb68: {
+        _123 = const "name";
+        _127 = copy _1 == const null;
+        branch copy _127 -> [bb76, bb69];
+    }
+
+    bb69: {
+        _128 = const "profile";
+        _126 = copy _1[_128];
+        _129 = copy _126 == const null;
+        branch copy _129 -> [bb76, bb70];
+    }
+
+    bb70: {
+        _131 = copy _1 == const null;
+        branch copy _131 -> [bb76, bb71];
+    }
+
+    bb71: {
+        _132 = const "profile";
+        _130 = copy _1[_132];
+        _133 = const "address";
+        _125 = copy _130[_133];
+        _134 = copy _125 == const null;
+        branch copy _134 -> [bb76, bb72];
+    }
+
+    bb72: {
+        _137 = copy _1 == const null;
+        branch copy _137 -> [bb76, bb73];
+    }
+
+    bb73: {
+        _138 = const "profile";
+        _136 = copy _1[_138];
+        _139 = copy _136 == const null;
+        branch copy _139 -> [bb76, bb74];
+    }
+
+    bb74: {
+        _141 = copy _1 == const null;
+        branch copy _141 -> [bb76, bb75];
+    }
+
+    bb75: {
+        _142 = const "profile";
+        _140 = copy _1[_142];
+        _143 = const "address";
+        _135 = copy _140[_143];
+        _144 = const "street";
+        _124 = copy _135[_144];
+        goto -> bb77;
+    }
+
+    bb76: {
+        _124 = const null;
+        goto -> bb77;
+    }
+
+    bb77: {
+        _119[_123] = copy _124;
+        _145 = copy _124 == const null;
+        branch copy _145 -> [bb78, bb79];
+    }
+
+    bb78: {
+        _119[_123] = const "no street";
+        goto -> bb79;
+    }
+
+    bb79: {
+        goto -> bb81;
+    }
+
+    bb80: {
+        goto -> bb81;
+    }
+
+    bb81: {
+        _148 = copy _1 == const null;
+        branch copy _148 -> [bb85, bb82];
+    }
+
+    bb82: {
+        _149 = const "profile";
+        _147 = copy _1[_149];
+        _150 = copy _147 == const null;
+        branch copy _150 -> [bb85, bb83];
+    }
+
+    bb83: {
+        _152 = copy _1 == const null;
+        branch copy _152 -> [bb85, bb84];
+    }
+
+    bb84: {
+        _153 = const "profile";
+        _151 = copy _1[_153];
+        _154 = const "name";
+        _146 = copy _151[_154];
+        goto -> bb86;
+    }
+
+    bb85: {
+        _146 = const null;
+        goto -> bb86;
+    }
+
+    bb86: {
+        _155 = copy _146 == const null;
+        branch copy _155 -> [bb87, bb88];
+    }
+
+    bb87: {
+        goto -> bb88;
+    }
+
+    bb88: {
+        _156 = copy _3 == const null;
+        branch copy _156 -> [bb89, bb90];
+    }
+
+    bb89: {
+        goto -> bb90;
+    }
+
+    bb90: {
+        _159 = copy _1 == const null;
+        branch copy _159 -> [bb94, bb91];
+    }
+
+    bb91: {
+        _160 = const "profile";
+        _158 = copy _1[_160];
+        _161 = copy _158 == const null;
+        branch copy _161 -> [bb94, bb92];
+    }
+
+    bb92: {
+        _163 = copy _1 == const null;
+        branch copy _163 -> [bb94, bb93];
+    }
+
+    bb93: {
+        _164 = const "profile";
+        _162 = copy _1[_164];
+        _165 = const "name";
+        _157 = copy _162[_165];
+        goto -> bb95;
+    }
+
+    bb94: {
+        _157 = const null;
+        goto -> bb95;
+    }
+
+    bb95: {
+        _166 = copy _157 == const null;
+        branch copy _166 -> [bb96, bb97];
+    }
+
+    bb96: {
+        goto -> bb97;
+    }
+
+    bb97: {
+        _169 = copy _1 == const null;
+        branch copy _169 -> [bb101, bb98];
+    }
+
+    bb98: {
+        _170 = const "profile";
+        _168 = copy _1[_170];
+        _171 = copy _168 == const null;
+        branch copy _171 -> [bb101, bb99];
+    }
+
+    bb99: {
+        _173 = copy _1 == const null;
+        branch copy _173 -> [bb101, bb100];
+    }
+
+    bb100: {
+        _174 = const "profile";
+        _172 = copy _1[_174];
+        _175 = const "name";
+        _167 = copy _172[_175];
+        goto -> bb102;
+    }
+
+    bb101: {
+        _167 = const null;
+        goto -> bb102;
+    }
+
+    bb102: {
+        branch copy _167 -> [bb104, bb103];
+    }
+
+    bb103: {
+        goto -> bb104;
+    }
+
+    bb104: {
+        _0 = copy _4;
+        goto -> bb105;
+    }
+
+    bb105: {
+        return;
+    }
+}
+
+fn user.OptionalCall(callback: (int) -> string?, nonNullCb: (int) -> string, name: string?) -> string {
+    // Locals:
+    let _0: string // _0 // return
+    let _1: (int) -> string? // callback // param
+    let _2: (int) -> string // nonNullCb // param
+    let _3: string? // name // param
+    let _4: string? // c1
+    let _5: bool
+    let _6: void? // c4
+    let _7: bool
+    let _8: string? // c5
+    let _9: bool
+    let _10: string?
+    let _11: bool
+
+    bb0: {
+        _5 = copy _1 == const null;
+        branch copy _5 -> [bb3, bb1];
+    }
+
+    bb1: {
+        _4 = call copy _1(const 42_i64) -> [bb2];
+    }
+
+    bb2: {
+        goto -> bb4;
+    }
+
+    bb3: {
+        _4 = const null;
+        goto -> bb4;
+    }
+
+    bb4: {
+        goto -> bb5;
+    }
+
+    bb5: {
+        _7 = copy _3 == const null;
+        branch copy _7 -> [bb8, bb6];
+    }
+
+    bb6: {
+        _6 = call copy _3(const 42_i64) -> [bb7];
+    }
+
+    bb7: {
+        goto -> bb9;
+    }
+
+    bb8: {
+        _6 = const null;
+        goto -> bb9;
+    }
+
+    bb9: {
+        _9 = copy _2 == const null;
+        branch copy _9 -> [bb12, bb10];
+    }
+
+    bb10: {
+        _8 = call copy _2(const 42_i64) -> [bb11];
+    }
+
+    bb11: {
+        goto -> bb13;
+    }
+
+    bb12: {
+        _8 = const null;
+        goto -> bb13;
+    }
+
+    bb13: {
+        _10 = copy _4;
+        _0 = copy _10;
+        _11 = copy _10 == const null;
+        branch copy _11 -> [bb14, bb15];
+    }
+
+    bb14: {
+        _0 = const "default";
+        goto -> bb15;
+    }
+
+    bb15: {
+        goto -> bb16;
+    }
+
+    bb16: {
+        return;
+    }
+}
+
+fn user.OptionalChaining(user: User?, nonNullUser: User, node: Node?) -> string {
+    // Locals:
+    let _0: string // _0 // return
+    let _1: User? // user // param
+    let _2: User // nonNullUser // param
+    let _3: Node? // node // param
+    let _4: bool
+    let _5: string
+    let _6: string? // a2
+    let _7: Profile?
+    let _8: bool
+    let _9: string
+    let _10: bool
+    let _11: Profile?
+    let _12: bool
+    let _13: string
+    let _14: string
+    let _15: Address?
+    let _16: Profile?
+    let _17: bool
+    let _18: string
+    let _19: bool
+    let _20: Profile?
+    let _21: bool
+    let _22: string
+    let _23: string
+    let _24: bool
+    let _25: Address?
+    let _26: Profile?
+    let _27: bool
+    let _28: string
+    let _29: bool
+    let _30: Profile?
+    let _31: bool
+    let _32: string
+    let _33: string
+    let _34: string
+    let _35: Profile?
+    let _36: bool
+    let _37: string
+    let _38: string
+    let _39: Address?
+    let _40: Profile?
+    let _41: bool
+    let _42: string
+    let _43: string
+    let _44: string
+    let _45: Address?
+    let _46: Profile?
+    let _47: bool
+    let _48: string
+    let _49: bool
+    let _50: Profile?
+    let _51: bool
+    let _52: string
+    let _53: string
+    let _54: string
+    let _55: Profile?
+    let _56: bool
+    let _57: string
+    let _58: string
+    let _59: Profile?
+    let _60: bool
+    let _61: string
+    let _62: bool
+    let _63: Profile?
+    let _64: bool
+    let _65: string
+    let _66: string
+    let _67: Address?
+    let _68: Profile?
+    let _69: bool
+    let _70: string
+    let _71: bool
+    let _72: Profile?
+    let _73: bool
+    let _74: string
+    let _75: string
+    let _76: bool
+    let _77: Address?
+    let _78: Profile?
+    let _79: bool
+    let _80: string
+    let _81: bool
+    let _82: Profile?
+    let _83: bool
+    let _84: string
+    let _85: string
+    let _86: string
+    let _87: bool
+    let _88: Profile?
+    let _89: bool
+    let _90: string
+    let _91: bool
+    let _92: string
+    let _93: Address?
+    let _94: Profile?
+    let _95: bool
+    let _96: string
+    let _97: bool
+    let _98: Profile?
+    let _99: bool
+    let _100: string
+    let _101: string
+    let _102: bool
+    let _103: string
+    let _104: User?
+    let _105: bool
+    let _106: string
+    let _107: string
+    let _108: User?
+    let _109: bool
+    let _110: string
+    let _111: Profile?
+    let _112: bool
+    let _113: string
+    let _114: bool
+    let _115: bool
+    let _116: string
+    let _117: string?
+    let _118: bool
+
+    bb0: {
+        _4 = copy _1 == const null;
+        branch copy _4 -> [bb2, bb1];
+    }
+
+    bb1: {
+        _5 = const "id";
+        goto -> bb3;
+    }
+
+    bb2: {
+        goto -> bb3;
+    }
+
+    bb3: {
+        _8 = copy _1 == const null;
+        branch copy _8 -> [bb7, bb4];
+    }
+
+    bb4: {
+        _9 = const "profile";
+        _7 = copy _1[_9];
+        _10 = copy _7 == const null;
+        branch copy _10 -> [bb7, bb5];
+    }
+
+    bb5: {
+        _12 = copy _1 == const null;
+        branch copy _12 -> [bb7, bb6];
+    }
+
+    bb6: {
+        _13 = const "profile";
+        _11 = copy _1[_13];
+        _14 = const "name";
+        _6 = copy _11[_14];
+        goto -> bb8;
+    }
+
+    bb7: {
+        _6 = const null;
+        goto -> bb8;
+    }
+
+    bb8: {
+        _17 = copy _1 == const null;
+        branch copy _17 -> [bb16, bb9];
+    }
+
+    bb9: {
+        _18 = const "profile";
+        _16 = copy _1[_18];
+        _19 = copy _16 == const null;
+        branch copy _19 -> [bb16, bb10];
+    }
+
+    bb10: {
+        _21 = copy _1 == const null;
+        branch copy _21 -> [bb16, bb11];
+    }
+
+    bb11: {
+        _22 = const "profile";
+        _20 = copy _1[_22];
+        _23 = const "address";
+        _15 = copy _20[_23];
+        _24 = copy _15 == const null;
+        branch copy _24 -> [bb16, bb12];
+    }
+
+    bb12: {
+        _27 = copy _1 == const null;
+        branch copy _27 -> [bb16, bb13];
+    }
+
+    bb13: {
+        _28 = const "profile";
+        _26 = copy _1[_28];
+        _29 = copy _26 == const null;
+        branch copy _29 -> [bb16, bb14];
+    }
+
+    bb14: {
+        _31 = copy _1 == const null;
+        branch copy _31 -> [bb16, bb15];
+    }
+
+    bb15: {
+        _32 = const "profile";
+        _30 = copy _1[_32];
+        _33 = const "address";
+        _25 = copy _30[_33];
+        _34 = const "street";
+        goto -> bb17;
+    }
+
+    bb16: {
+        goto -> bb17;
+    }
+
+    bb17: {
+        _36 = copy _1 == const null;
+        branch copy _36 -> [bb19, bb18];
+    }
+
+    bb18: {
+        _37 = const "profile";
+        _35 = copy _1[_37];
+        _38 = const "name";
+        goto -> bb20;
+    }
+
+    bb19: {
+        goto -> bb20;
+    }
+
+    bb20: {
+        _41 = copy _1 == const null;
+        branch copy _41 -> [bb22, bb21];
+    }
+
+    bb21: {
+        _42 = const "profile";
+        _40 = copy _1[_42];
+        _43 = const "address";
+        _39 = copy _40[_43];
+        _44 = const "street";
+        goto -> bb23;
+    }
+
+    bb22: {
+        goto -> bb23;
+    }
+
+    bb23: {
+        _47 = copy _1 == const null;
+        branch copy _47 -> [bb27, bb24];
+    }
+
+    bb24: {
+        _48 = const "profile";
+        _46 = copy _1[_48];
+        _49 = copy _46 == const null;
+        branch copy _49 -> [bb27, bb25];
+    }
+
+    bb25: {
+        _51 = copy _1 == const null;
+        branch copy _51 -> [bb27, bb26];
+    }
+
+    bb26: {
+        _52 = const "profile";
+        _50 = copy _1[_52];
+        _53 = const "address";
+        _45 = copy _50[_53];
+        _54 = const "street";
+        goto -> bb28;
+    }
+
+    bb27: {
+        goto -> bb28;
+    }
+
+    bb28: {
+        _56 = copy _1 == const null;
+        branch copy _56 -> [bb30, bb29];
+    }
+
+    bb29: {
+        _57 = const "profile";
+        _55 = copy _1[_57];
+        goto -> bb31;
+    }
+
+    bb30: {
+        _55 = const null;
+        goto -> bb31;
+    }
+
+    bb31: {
+        _58 = const "name";
+        _60 = copy _1 == const null;
+        branch copy _60 -> [bb35, bb32];
+    }
+
+    bb32: {
+        _61 = const "profile";
+        _59 = copy _1[_61];
+        _62 = copy _59 == const null;
+        branch copy _62 -> [bb35, bb33];
+    }
+
+    bb33: {
+        _64 = copy _1 == const null;
+        branch copy _64 -> [bb35, bb34];
+    }
+
+    bb34: {
+        _65 = const "profile";
+        _63 = copy _1[_65];
+        _66 = const "name";
+        goto -> bb36;
+    }
+
+    bb35: {
+        goto -> bb36;
+    }
+
+    bb36: {
+        _69 = copy _1 == const null;
+        branch copy _69 -> [bb44, bb37];
+    }
+
+    bb37: {
+        _70 = const "profile";
+        _68 = copy _1[_70];
+        _71 = copy _68 == const null;
+        branch copy _71 -> [bb44, bb38];
+    }
+
+    bb38: {
+        _73 = copy _1 == const null;
+        branch copy _73 -> [bb44, bb39];
+    }
+
+    bb39: {
+        _74 = const "profile";
+        _72 = copy _1[_74];
+        _75 = const "address";
+        _67 = copy _72[_75];
+        _76 = copy _67 == const null;
+        branch copy _76 -> [bb44, bb40];
+    }
+
+    bb40: {
+        _79 = copy _1 == const null;
+        branch copy _79 -> [bb44, bb41];
+    }
+
+    bb41: {
+        _80 = const "profile";
+        _78 = copy _1[_80];
+        _81 = copy _78 == const null;
+        branch copy _81 -> [bb44, bb42];
+    }
+
+    bb42: {
+        _83 = copy _1 == const null;
+        branch copy _83 -> [bb44, bb43];
+    }
+
+    bb43: {
+        _84 = const "profile";
+        _82 = copy _1[_84];
+        _85 = const "address";
+        _77 = copy _82[_85];
+        _86 = const "zip";
+        goto -> bb45;
+    }
+
+    bb44: {
+        goto -> bb45;
+    }
+
+    bb45: {
+        _87 = copy _2 == const null;
+        branch copy _87 -> [bb47, bb46];
+    }
+
+    bb46: {
+        goto -> bb48;
+    }
+
+    bb47: {
+        goto -> bb48;
+    }
+
+    bb48: {
+        _89 = copy _1 == const null;
+        branch copy _89 -> [bb51, bb49];
+    }
+
+    bb49: {
+        _90 = const "profile";
+        _88 = copy _1[_90];
+        _91 = copy _88 == const null;
+        branch copy _91 -> [bb51, bb50];
+    }
+
+    bb50: {
+        _92 = const "name";
+        _88[_92] = const "updated";
+        goto -> bb52;
+    }
+
+    bb51: {
+        goto -> bb52;
+    }
+
+    bb52: {
+        _95 = copy _1 == const null;
+        branch copy _95 -> [bb57, bb53];
+    }
+
+    bb53: {
+        _96 = const "profile";
+        _94 = copy _1[_96];
+        _97 = copy _94 == const null;
+        branch copy _97 -> [bb57, bb54];
+    }
+
+    bb54: {
+        _99 = copy _1 == const null;
+        branch copy _99 -> [bb57, bb55];
+    }
+
+    bb55: {
+        _100 = const "profile";
+        _98 = copy _1[_100];
+        _101 = const "address";
+        _93 = copy _98[_101];
+        _102 = copy _93 == const null;
+        branch copy _102 -> [bb57, bb56];
+    }
+
+    bb56: {
+        _103 = const "street";
+        _93[_103] = const "123 Main St";
+        goto -> bb58;
+    }
+
+    bb57: {
+        goto -> bb58;
+    }
+
+    bb58: {
+        _105 = copy _1 == const null;
+        branch copy _105 -> [bb60, bb59];
+    }
+
+    bb59: {
+        _106 = const "profile";
+        _107 = const "name";
+        _104[_106][_107] = const "updated2";
+        goto -> bb61;
+    }
+
+    bb60: {
+        goto -> bb61;
+    }
+
+    bb61: {
+        _109 = copy _1 == const null;
+        branch copy _109 -> [bb63, bb62];
+    }
+
+    bb62: {
+        _110 = const "id";
+        _108[_110] = copy _1[_110] + const 1_i64;
+        goto -> bb64;
+    }
+
+    bb63: {
+        goto -> bb64;
+    }
+
+    bb64: {
+        _112 = copy _1 == const null;
+        branch copy _112 -> [bb68, bb65];
+    }
+
+    bb65: {
+        _113 = const "profile";
+        _111 = copy _1[_113];
+        _114 = copy _111 == const null;
+        branch copy _114 -> [bb68, bb66];
+    }
+
+    bb66: {
+        _115 = copy _1 == const null;
+        branch copy _115 -> [bb68, bb67];
+    }
+
+    bb67: {
+        _116 = const "profile";
+        goto -> bb69;
+    }
+
+    bb68: {
+        goto -> bb69;
+    }
+
+    bb69: {
+        _117 = copy _6;
+        _0 = copy _117;
+        _118 = copy _117 == const null;
+        branch copy _118 -> [bb70, bb71];
+    }
+
+    bb70: {
+        _0 = const "default";
+        goto -> bb71;
+    }
+
+    bb71: {
+        goto -> bb72;
+    }
+
+    bb72: {
+        return;
+    }
+}
+
+fn user.OptionalIndex(node: Node?, items: int[]?, lookup: map<string, int>?, nonNullItems: int[]) -> int {
+    // Locals:
+    let _0: int // _0 // return
+    let _1: Node? // node // param
+    let _2: int[]? // items // param
+    let _3: map<string, int>? // lookup // param
+    let _4: int[] // nonNullItems // param
+    let _5: int? // b1
+    let _6: bool
+    let _7: 0
+    let _8: Node[]?
+    let _9: bool
+    let _10: string
+    let _11: bool
+    let _12: Node[]?
+    let _13: bool
+    let _14: string
+    let _15: 0
+    let _16: Node?
+    let _17: Node[]?
+    let _18: bool
+    let _19: string
+    let _20: bool
+    let _21: Node[]?
+    let _22: bool
+    let _23: string
+    let _24: 0
+    let _25: string
+    let _26: Node?
+    let _27: Node?
+    let _28: Node[]?
+    let _29: bool
+    let _30: string
+    let _31: bool
+    let _32: Node[]?
+    let _33: bool
+    let _34: string
+    let _35: 0
+    let _36: string
+    let _37: bool
+    let _38: Node?
+    let _39: Node?
+    let _40: Node[]?
+    let _41: bool
+    let _42: string
+    let _43: bool
+    let _44: Node[]?
+    let _45: bool
+    let _46: string
+    let _47: 0
+    let _48: string
+    let _49: string
+    let _50: bool
+    let _51: "total"
+    let _52: map<string, Node>?
+    let _53: bool
+    let _54: string
+    let _55: bool
+    let _56: map<string, Node>?
+    let _57: bool
+    let _58: string
+    let _59: "main"
+    let _60: Node?
+    let _61: map<string, Node>?
+    let _62: bool
+    let _63: string
+    let _64: bool
+    let _65: map<string, Node>?
+    let _66: bool
+    let _67: string
+    let _68: "main"
+    let _69: string
+    let _70: bool
+    let _71: bool
+    let _72: Node[]?
+    let _73: bool
+    let _74: string
+    let _75: 0
+    let _76: void // b9
+    let _77: void?
+    let _78: int?
+    let _79: bool
+    let _80: 0
+    let _81: string
+    let _82: Node[]?
+    let _83: bool
+    let _84: string
+    let _85: bool
+    let _86: Node[]?
+    let _87: bool
+    let _88: string
+    let _89: int?
+    let _90: bool
+    let _91: string
+    let _92: Node[]?
+    let _93: bool
+    let _94: string
+    let _95: bool
+    let _96: Node[]?
+    let _97: bool
+    let _98: string
+    let _99: int | 0
+    let _100: int?
+    let _101: bool
+    let _102: 0
+    let _103: bool
+    let _104: bool
+    let _105: 0
+    let _106: int[]?
+    let _107: bool
+    let _108: 0
+    let _109: Node[]?
+    let _110: bool
+    let _111: string
+    let _112: bool
+    let _113: 0
+    let _114: string
+    let _115: map<string, int>?
+    let _116: bool
+    let _117: "total"
+    let _118: map<string, Node>?
+    let _119: bool
+    let _120: string
+    let _121: bool
+    let _122: "main"
+    let _123: string
+    let _124: int[]?
+    let _125: bool
+    let _126: 0
+    let _127: map<string, int>?
+    let _128: bool
+    let _129: "total"
+    let _130: bool
+    let _131: int?
+    let _132: bool
+
+    bb0: {
+        _6 = copy _2 == const null;
+        branch copy _6 -> [bb2, bb1];
+    }
+
+    bb1: {
+        _7 = const 0_i64;
+        _5 = copy _2[_7];
+        goto -> bb3;
+    }
+
+    bb2: {
+        _5 = const null;
+        goto -> bb3;
+    }
+
+    bb3: {
+        _9 = copy _1 == const null;
+        branch copy _9 -> [bb7, bb4];
+    }
+
+    bb4: {
+        _10 = const "children";
+        _8 = copy _1[_10];
+        _11 = copy _8 == const null;
+        branch copy _11 -> [bb7, bb5];
+    }
+
+    bb5: {
+        _13 = copy _1 == const null;
+        branch copy _13 -> [bb7, bb6];
+    }
+
+    bb6: {
+        _14 = const "children";
+        _12 = copy _1[_14];
+        _15 = const 0_i64;
+        goto -> bb8;
+    }
+
+    bb7: {
+        goto -> bb8;
+    }
+
+    bb8: {
+        _18 = copy _1 == const null;
+        branch copy _18 -> [bb12, bb9];
+    }
+
+    bb9: {
+        _19 = const "children";
+        _17 = copy _1[_19];
+        _20 = copy _17 == const null;
+        branch copy _20 -> [bb12, bb10];
+    }
+
+    bb10: {
+        _22 = copy _1 == const null;
+        branch copy _22 -> [bb12, bb11];
+    }
+
+    bb11: {
+        _23 = const "children";
+        _21 = copy _1[_23];
+        _24 = const 0_i64;
+        _16 = copy _21[_24];
+        _25 = const "value";
+        goto -> bb13;
+    }
+
+    bb12: {
+        goto -> bb13;
+    }
+
+    bb13: {
+        _29 = copy _1 == const null;
+        branch copy _29 -> [bb21, bb14];
+    }
+
+    bb14: {
+        _30 = const "children";
+        _28 = copy _1[_30];
+        _31 = copy _28 == const null;
+        branch copy _31 -> [bb21, bb15];
+    }
+
+    bb15: {
+        _33 = copy _1 == const null;
+        branch copy _33 -> [bb21, bb16];
+    }
+
+    bb16: {
+        _34 = const "children";
+        _32 = copy _1[_34];
+        _35 = const 0_i64;
+        _27 = copy _32[_35];
+        _36 = const "next";
+        _26 = copy _27[_36];
+        _37 = copy _26 == const null;
+        branch copy _37 -> [bb21, bb17];
+    }
+
+    bb17: {
+        _41 = copy _1 == const null;
+        branch copy _41 -> [bb21, bb18];
+    }
+
+    bb18: {
+        _42 = const "children";
+        _40 = copy _1[_42];
+        _43 = copy _40 == const null;
+        branch copy _43 -> [bb21, bb19];
+    }
+
+    bb19: {
+        _45 = copy _1 == const null;
+        branch copy _45 -> [bb21, bb20];
+    }
+
+    bb20: {
+        _46 = const "children";
+        _44 = copy _1[_46];
+        _47 = const 0_i64;
+        _39 = copy _44[_47];
+        _48 = const "next";
+        _38 = copy _39[_48];
+        _49 = const "value";
+        goto -> bb22;
+    }
+
+    bb21: {
+        goto -> bb22;
+    }
+
+    bb22: {
+        _50 = copy _3 == const null;
+        branch copy _50 -> [bb24, bb23];
+    }
+
+    bb23: {
+        _51 = const "total";
+        goto -> bb25;
+    }
+
+    bb24: {
+        goto -> bb25;
+    }
+
+    bb25: {
+        _53 = copy _1 == const null;
+        branch copy _53 -> [bb29, bb26];
+    }
+
+    bb26: {
+        _54 = const "labels";
+        _52 = copy _1[_54];
+        _55 = copy _52 == const null;
+        branch copy _55 -> [bb29, bb27];
+    }
+
+    bb27: {
+        _57 = copy _1 == const null;
+        branch copy _57 -> [bb29, bb28];
+    }
+
+    bb28: {
+        _58 = const "labels";
+        _56 = copy _1[_58];
+        _59 = const "main";
+        goto -> bb30;
+    }
+
+    bb29: {
+        goto -> bb30;
+    }
+
+    bb30: {
+        _62 = copy _1 == const null;
+        branch copy _62 -> [bb34, bb31];
+    }
+
+    bb31: {
+        _63 = const "labels";
+        _61 = copy _1[_63];
+        _64 = copy _61 == const null;
+        branch copy _64 -> [bb34, bb32];
+    }
+
+    bb32: {
+        _66 = copy _1 == const null;
+        branch copy _66 -> [bb34, bb33];
+    }
+
+    bb33: {
+        _67 = const "labels";
+        _65 = copy _1[_67];
+        _68 = const "main";
+        _60 = copy _65[_68];
+        _69 = const "value";
+        goto -> bb35;
+    }
+
+    bb34: {
+        goto -> bb35;
+    }
+
+    bb35: {
+        _70 = copy _1 == const null;
+        branch copy _70 -> [bb37, bb36];
+    }
+
+    bb36: {
+        goto -> bb38;
+    }
+
+    bb37: {
+        goto -> bb38;
+    }
+
+    bb38: {
+        _71 = const null == const null;
+        branch copy _71 -> [bb43, bb39];
+    }
+
+    bb39: {
+        _73 = copy _1 == const null;
+        branch copy _73 -> [bb41, bb40];
+    }
+
+    bb40: {
+        _74 = const "children";
+        _72 = copy _1[_74];
+        goto -> bb42;
+    }
+
+    bb41: {
+        _72 = const null;
+        goto -> bb42;
+    }
+
+    bb42: {
+        _75 = const 0_i64;
+        goto -> bb44;
+    }
+
+    bb43: {
+        goto -> bb44;
+    }
+
+    bb44: {
+        _79 = copy _2 == const null;
+        branch copy _79 -> [bb46, bb45];
+    }
+
+    bb45: {
+        _80 = const 0_i64;
+        _78 = copy _2[_80];
+        goto -> bb47;
+    }
+
+    bb46: {
+        _78 = const null;
+        goto -> bb47;
+    }
+
+    bb47: {
+        _81 = const "to_string";
+        _77 = copy _78[_81];
+        _76 = call copy _77() -> [bb48];
+    }
+
+    bb48: {
+        _83 = copy _1 == const null;
+        branch copy _83 -> [bb55, bb49];
+    }
+
+    bb49: {
+        _84 = const "children";
+        _82 = copy _1[_84];
+        _85 = copy _82 == const null;
+        branch copy _85 -> [bb55, bb50];
+    }
+
+    bb50: {
+        _87 = copy _1 == const null;
+        branch copy _87 -> [bb55, bb51];
+    }
+
+    bb51: {
+        _88 = const "children";
+        _86 = copy _1[_88];
+        _90 = copy _1 == const null;
+        branch copy _90 -> [bb53, bb52];
+    }
+
+    bb52: {
+        _91 = const "value";
+        _89 = copy _1[_91];
+        goto -> bb54;
+    }
+
+    bb53: {
+        _89 = const null;
+        goto -> bb54;
+    }
+
+    bb54: {
+        goto -> bb56;
+    }
+
+    bb55: {
+        goto -> bb56;
+    }
+
+    bb56: {
+        _93 = copy _1 == const null;
+        branch copy _93 -> [bb65, bb57];
+    }
+
+    bb57: {
+        _94 = const "children";
+        _92 = copy _1[_94];
+        _95 = copy _92 == const null;
+        branch copy _95 -> [bb65, bb58];
+    }
+
+    bb58: {
+        _97 = copy _1 == const null;
+        branch copy _97 -> [bb65, bb59];
+    }
+
+    bb59: {
+        _98 = const "children";
+        _96 = copy _1[_98];
+        _101 = copy _2 == const null;
+        branch copy _101 -> [bb61, bb60];
+    }
+
+    bb60: {
+        _102 = const 0_i64;
+        _100 = copy _2[_102];
+        goto -> bb62;
+    }
+
+    bb61: {
+        _100 = const null;
+        goto -> bb62;
+    }
+
+    bb62: {
+        _99 = copy _100;
+        _103 = copy _100 == const null;
+        branch copy _103 -> [bb63, bb64];
+    }
+
+    bb63: {
+        _99 = const 0_i64;
+        goto -> bb64;
+    }
+
+    bb64: {
+        goto -> bb66;
+    }
+
+    bb65: {
+        goto -> bb66;
+    }
+
+    bb66: {
+        _104 = copy _4 == const null;
+        branch copy _104 -> [bb68, bb67];
+    }
+
+    bb67: {
+        _105 = const 0_i64;
+        goto -> bb69;
+    }
+
+    bb68: {
+        goto -> bb69;
+    }
+
+    bb69: {
+        _107 = copy _2 == const null;
+        branch copy _107 -> [bb71, bb70];
+    }
+
+    bb70: {
+        _108 = const 0_i64;
+        _106[_108] = const 42_i64;
+        goto -> bb72;
+    }
+
+    bb71: {
+        goto -> bb72;
+    }
+
+    bb72: {
+        _110 = copy _1 == const null;
+        branch copy _110 -> [bb75, bb73];
+    }
+
+    bb73: {
+        _111 = const "children";
+        _109 = copy _1[_111];
+        _112 = copy _109 == const null;
+        branch copy _112 -> [bb75, bb74];
+    }
+
+    bb74: {
+        _113 = const 0_i64;
+        _114 = const "value";
+        _109[_113][_114] = const 99_i64;
+        goto -> bb76;
+    }
+
+    bb75: {
+        goto -> bb76;
+    }
+
+    bb76: {
+        _116 = copy _3 == const null;
+        branch copy _116 -> [bb78, bb77];
+    }
+
+    bb77: {
+        _117 = const "total";
+        _115[_117] = const 100_i64;
+        goto -> bb79;
+    }
+
+    bb78: {
+        goto -> bb79;
+    }
+
+    bb79: {
+        _119 = copy _1 == const null;
+        branch copy _119 -> [bb82, bb80];
+    }
+
+    bb80: {
+        _120 = const "labels";
+        _118 = copy _1[_120];
+        _121 = copy _118 == const null;
+        branch copy _121 -> [bb82, bb81];
+    }
+
+    bb81: {
+        _122 = const "main";
+        _123 = const "value";
+        _118[_122][_123] = const 50_i64;
+        goto -> bb83;
+    }
+
+    bb82: {
+        goto -> bb83;
+    }
+
+    bb83: {
+        _125 = copy _2 == const null;
+        branch copy _125 -> [bb85, bb84];
+    }
+
+    bb84: {
+        _126 = const 0_i64;
+        _124[_126] = copy _2[_126] + const 10_i64;
+        goto -> bb86;
+    }
+
+    bb85: {
+        goto -> bb86;
+    }
+
+    bb86: {
+        _128 = copy _3 == const null;
+        branch copy _128 -> [bb88, bb87];
+    }
+
+    bb87: {
+        _129 = const "total";
+        _127[_129] = copy _3[_129] + const 5_i64;
+        goto -> bb89;
+    }
+
+    bb88: {
+        goto -> bb89;
+    }
+
+    bb89: {
+        _130 = copy _2 == const null;
+        branch copy _130 -> [bb91, bb90];
+    }
+
+    bb90: {
+        goto -> bb92;
+    }
+
+    bb91: {
+        goto -> bb92;
+    }
+
+    bb92: {
+        _131 = copy _5;
+        _0 = copy _131;
+        _132 = copy _131 == const null;
+        branch copy _132 -> [bb93, bb94];
+    }
+
+    bb93: {
+        _0 = const 0_i64;
+        goto -> bb94;
+    }
+
+    bb94: {
+        goto -> bb95;
+    }
+
+    bb95: {
+        return;
+    }
+}

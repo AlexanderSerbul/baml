@@ -504,9 +504,24 @@ impl FromCST for BinaryExpr {
         let left = it.expect_next("left expression")?;
         let left_expr = Expression::from_cst(left)?;
 
-        // Get operator
-        let op = it.expect_next("binary operator")?;
-        let op = BinaryOp::from_cst(op)?;
+        // Get operator — handle `??` which appears as two consecutive QUESTION tokens
+        let op_elem = it.expect_next("binary operator")?;
+        let op = if op_elem.kind() == SyntaxKind::QUESTION {
+            // Check for second QUESTION to form `??`
+            let first_range = op_elem.text_range();
+            if let Some(second) = it.next_if_kind(SyntaxKind::QUESTION) {
+                let combined_range = TextRange::new(first_range.start(), second.text_range().end());
+                BinaryOp::QuestionQuestion(t::QuestionQuestion::new_from_span(combined_range))
+            } else {
+                return Err(StrongAstError::UnexpectedKindDesc {
+                    expected_desc: "binary operator".into(),
+                    found: SyntaxKind::QUESTION,
+                    at: first_range,
+                });
+            }
+        } else {
+            BinaryOp::from_cst(op_elem)?
+        };
 
         // Get right expression
         let right = it.expect_next("right expression")?;

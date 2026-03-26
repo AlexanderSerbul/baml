@@ -1,0 +1,15 @@
+---
+source: crates/baml_tests/src/compiler2_tir/phase3a.rs
+expression: "render_tir(&db, file)"
+---
+class user.Address {
+  street: string
+}
+class user.User {
+  address: user.Address?
+}
+function user.f(u: user.User?) -> string? throws never {
+  { : string?
+  }
+  !! 96..119: missing return: expected `string?`
+}

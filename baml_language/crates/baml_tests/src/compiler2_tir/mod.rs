@@ -203,7 +203,7 @@ pub(crate) mod support {
             }
             Expr::Throw { value } => format!("throw {}", expr_desc(*value, body)),
             Expr::Binary { op, lhs, rhs } => {
-                format!("{} {op:?} {}", expr_desc(*lhs, body), expr_desc(*rhs, body))
+                format!("{} {op} {}", expr_desc(*lhs, body), expr_desc(*rhs, body))
             }
             Expr::Unary { op, expr: inner } => format!("{op:?} {}", expr_desc(*inner, body)),
             Expr::Call { callee, args } => {
@@ -239,9 +239,22 @@ pub(crate) mod support {
             Expr::FieldAccess { base, field } => {
                 format!("{}.{field}", expr_desc(*base, body))
             }
+            Expr::OptionalFieldAccess { base, field } => {
+                format!("{}?.{field}", expr_desc(*base, body))
+            }
             Expr::Index { base, index } => {
                 format!("{}[{}]", expr_desc(*base, body), expr_desc(*index, body))
             }
+            Expr::OptionalIndex { base, index } => {
+                format!("{}?.[{}]", expr_desc(*base, body), expr_desc(*index, body))
+            }
+            Expr::OptionalCall { callee, args } => {
+                let callee_str = expr_desc(*callee, body);
+                let args_str: Vec<String> =
+                    args.iter().map(|a| expr_desc(*a, body)).collect();
+                format!("{}?.({})", callee_str, args_str.join(", "))
+            }
+            Expr::OptionalChain { expr } => expr_desc(*expr, body),
             Expr::Missing => "<missing>".into(),
         }
     }
@@ -1120,11 +1133,33 @@ pub(crate) mod support {
                         expr_desc_hir(*base, body, prefix, local_type_names)
                     )
                 }
+                Expr::OptionalFieldAccess { base, field } => {
+                    format!(
+                        "{}?.{field}",
+                        expr_desc_hir(*base, body, prefix, local_type_names)
+                    )
+                }
+                Expr::OptionalIndex { base, index } => format!(
+                    "{}?.[{}]",
+                    expr_desc_hir(*base, body, prefix, local_type_names),
+                    expr_desc_hir(*index, body, prefix, local_type_names)
+                ),
+                Expr::OptionalCall { callee, args } => {
+                    let callee_str = expr_desc_hir(*callee, body, prefix, local_type_names);
+                    let arg_strs: Vec<String> = args
+                        .iter()
+                        .map(|a| expr_desc_hir(*a, body, prefix, local_type_names))
+                        .collect();
+                    format!("{callee_str}?.({})", arg_strs.join(", "))
+                }
                 Expr::Index { base, index } => format!(
                     "{}[{}]",
                     expr_desc_hir(*base, body, prefix, local_type_names),
                     expr_desc_hir(*index, body, prefix, local_type_names)
                 ),
+                Expr::OptionalChain { expr } => {
+                    expr_desc_hir(*expr, body, prefix, local_type_names)
+                }
                 Expr::Missing => "<missing>".into(),
             }
         }

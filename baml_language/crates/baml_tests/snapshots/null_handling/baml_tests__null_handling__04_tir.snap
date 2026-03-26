@@ -1,0 +1,139 @@
+---
+source: crates/baml_tests/src/generated_tests.rs
+---
+=== TIR2 ===
+class user.Address {
+  street: string
+  zip: string?
+}
+class user.Profile {
+  name: string
+  address: user.Address?
+  scores: int[]?
+  settings: map<string, string>?
+}
+class user.User {
+  id: int
+  profile: user.Profile?
+}
+class user.Node {
+  value: int
+  next: user.Node?
+  children: user.Node[]?
+  labels: map<string, user.Node>?
+}
+function user.OptionalChaining(user: user.User?, nonNullUser: user.User, node: user.Node?) -> string throws never {
+  { : never
+    let a1 = user?.id : int?
+    let a2 = user?.profile?.name : string?
+    let a3 = user?.profile?.address?.street : string?
+    let a4 = user?.profile.name : string?
+    let a5 = user?.profile.address.street : string?
+    let a6 = user?.profile?.address.street : string?
+    let a7 = user?.profile.name : string?
+    let a8 = user?.profile?.name : string?
+    let a9 = user?.profile?.address?.zip : string?
+    let a10 = nonNullUser?.id : int?
+    user?.profile?.name = "updated" : "updated"
+    user?.profile?.address?.street = "123 Main St" : "123 Main St"
+    user?.profile.name = "updated2" : "updated2"
+    user?.id Add= 1 : unknown
+    let a11 = user?.profile?.name + "new_name" : string
+    return a2 ?? "default" : string | "default"
+  }
+  !! 1727..1748: did you mean `?.name` here? `.name` is not allowed since `user.Profile?` can be null
+  !! 2014..2029: did you mean `.` here? `user.User` cannot be null, so `?.` does not make sense
+  !! 2379..2387: operator `Add` cannot be applied to `int?` and `1`
+}
+function user.OptionalIndex(node: user.Node?, items: int[]?, lookup: map<string, int>?, nonNullItems: int[]) -> int throws never {
+  { : never
+    let b1 = items?.[0] : int?
+    let b2 = node?.children?.[0] : user.Node?
+    let b3 = node?.children?.[0].value : int?
+    let b4 = node?.children?.[0].next?.value : int?
+    let b5 = lookup?.["total"] : int?
+    let b6 = node?.labels?.["main"] : user.Node?
+    let b7 = node?.labels?.["main"].value : int?
+    let b8 = node?.children?.[0] : user.Node?
+    let b9 = items?.[0].to_string() : unknown
+    let b10 = node?.children?.[node?.value] : user.Node?
+    let b11 = node?.children?.[items?.[0] ?? 0] : user.Node?
+    let b12 = nonNullItems?.[0] : int?
+    items?.[0] = 42 : 42
+    node?.children?.[0].value = 99 : 99
+    lookup?.["total"] = 100 : 100
+    node?.labels?.["main"].value = 50 : 50
+    items?.[0] Add= 10 : unknown
+    lookup?.["total"] Add= 5 : unknown
+    let b13 = items?.[0] + 77 : unknown
+    return b1 ?? 0 : int | 0
+  }
+  !! 3611..3634: did you mean `?.to_string` here? `.to_string` is not allowed since `int?` can be null
+  !! 3611..3634: unresolved member: int.to_string
+  !! 3611..3636: type `unknown?` is not callable
+  !! 3926..3943: did you mean `.` here? `int[]` cannot be null, so `?.` does not make sense
+  !! 4264..4274: operator `Add` cannot be applied to `int?` and `10`
+  !! 4286..4303: operator `Add` cannot be applied to `int?` and `5`
+  !! 4373..4388: operator `Add` cannot be applied to `int?` and `77`
+}
+function user.OptionalCall(callback: (int) -> string?, nonNullCb: (int) -> string, name: string?) -> string throws never {
+  { : never
+    let c1 = callback?.(42) : string?
+    let c2 = callback?.(42).length : (self: baml.String) -> int?
+    let c3 = callback?.(42).length : (self: baml.String) -> int?
+    let c4 = name?.(42) : unknown?
+    let c5 = nonNullCb?.(42) : string?
+    return c1 ?? "default" : string | "default"
+  }
+  !! 4812..4826: did you mean `.` here? `(int) -> string?` cannot be null, so `?.` does not make sense
+  !! 4918..4932: did you mean `.` here? `(int) -> string?` cannot be null, so `?.` does not make sense
+  !! 5144..5158: did you mean `.` here? `(int) -> string?` cannot be null, so `?.` does not make sense
+  !! 5142..5166: did you mean `?.length` here? `.length` is not allowed since `string?` can be null
+  !! 5242..5252: type `string` is not callable
+  !! 5325..5340: did you mean `.` here? `(int) -> string` cannot be null, so `?.` does not make sense
+}
+function user.NullCoalescing(user: user.User?, fallback: string, count: int) -> string throws never {
+  { : never
+    let d1 = user?.profile?.name ?? "Anonymous" : string | "Anonymous"
+    let d2 = user?.profile?.name ?? user?.profile?.address?.street ?? "Unknown" : string | string? | "Unknown"
+    let d3 = user?.profile?.name ?? fallback : string
+    let d4 = user?.profile?.name ?? user?.profile?.address?.zip : string | string?
+    let d5 = user?.profile?.scores?.[0] ?? 0 : int | 0
+    let d6 = user?.profile?.name ?? fallback : string
+    user?.profile?.name = user?.profile?.address?.street ?? "no street" : string | "no street"
+    let d7 = user?.profile?.name ?? fallback : string
+    let d8 = count ?? 0 : int | 0
+    let d9 = user?.profile?.name ?? null : string | null
+    let d10 = user?.profile?.name || "Anonymous" : bool
+    return d1 : string | "Anonymous"
+  }
+  !! 6051..6118: did you mean to remove `??`? `string | string?` cannot be null, so `??` does not make sense
+  !! 6303..6354: type mismatch: expected string?, got string | string?
+  !! 7267..7277: did you mean to remove `??`? `int` cannot be null, so `??` does not make sense
+  ?? 7347..7375: did you mean to remove `?? null`? the value is already nullable, so `?? null` is a no-op
+  ?? 7457..7492: did you mean `??` here? BAML uses `??` instead of `||` for null coalescing (type is `string?`)
+}
+function user.Combined(user: user.User?, node: user.Node?, items: int[]?) -> string throws never {
+  { : never
+    let e1 = user?.profile?.address?.street ?? "unknown" : string | "unknown"
+    let e2 = node?.children?.[node?.value ?? 0] : user.Node?
+    let e3 = user?.profile?.name ?? node?.labels?.["name"]?.value.to_string() ?? "fallback" : string | unknown | "fallback"
+    node?.children?.[0].next?.value = user?.id ?? 0 : int | 0
+    node?.value Add= items?.[0] ?? 1 : unknown
+    let e4 = node?.next?.value + 42 : unknown
+    let e5 = node?.children?.[user?.profile?.scores?.[0] ?? 0].value : int?
+    let e6 = node?.labels?.["first"]?.children?.[0].value : int?
+    node?.labels?.["counter"].value = items?.[0] ?? 0 + 1 : unknown
+    node?.labels?.["counter"].value Add= items?.[0] ?? 0 : unknown
+    node?.children?.[node?.value ?? 0]?.next?.value = node?.value ?? 0 : int | 0
+    return e3 : string | unknown | "fallback"
+  }
+  !! 8111..8151: unresolved member: int.to_string
+  !! 8111..8153: type `unknown?` is not callable
+  !! 8080..8175: did you mean to remove `??`? `string | unknown` cannot be null, so `??` does not make sense
+  !! 8338..8349: operator `Add` cannot be applied to `int?` and `int | 1`
+  !! 8454..8476: operator `Add` cannot be applied to `int?` and `42`
+  !! 8787..8809: operator `Add` cannot be applied to `int | 0` and `1`
+  !! 8787..8809: operator `Add` cannot be applied to `int | 0` and `1`
+  !! 8864..8900: operator `Add` cannot be applied to `int?` and `int | 0`
+}

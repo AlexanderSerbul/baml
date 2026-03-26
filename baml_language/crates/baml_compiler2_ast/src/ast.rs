@@ -274,9 +274,30 @@ pub enum Expr {
         base: ExprId,
         field: Name,
     },
+    /// Optional field access: `obj?.field` — short-circuits to null if base is null.
+    OptionalFieldAccess {
+        base: ExprId,
+        field: Name,
+    },
     Index {
         base: ExprId,
         index: ExprId,
+    },
+    /// Optional index: `obj?.[expr]` — short-circuits to null if base is null.
+    OptionalIndex {
+        base: ExprId,
+        index: ExprId,
+    },
+    /// Optional call: `func?.(args)` — short-circuits to null if callee is null.
+    OptionalCall {
+        callee: ExprId,
+        args: Vec<ExprId>,
+    },
+    /// Wraps an expression chain containing `?.` operators.
+    /// Delimits the scope of null short-circuiting.
+    /// If any `?.` inside encounters null, the entire OptionalChain evaluates to null.
+    OptionalChain {
+        expr: ExprId,
     },
     Missing,
 }
@@ -422,6 +443,36 @@ pub enum BinaryOp {
     Shl,
     Shr,
     Instanceof,
+    /// Null coalescing: `a ?? b` — returns `a` if non-null, else `b`.
+    NullCoalesce,
+}
+
+impl std::fmt::Display for BinaryOp {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            BinaryOp::Add => "+",
+            BinaryOp::Sub => "-",
+            BinaryOp::Mul => "*",
+            BinaryOp::Div => "/",
+            BinaryOp::Mod => "%",
+            BinaryOp::Eq => "==",
+            BinaryOp::Ne => "!=",
+            BinaryOp::Lt => "<",
+            BinaryOp::Le => "<=",
+            BinaryOp::Gt => ">",
+            BinaryOp::Ge => ">=",
+            BinaryOp::And => "&&",
+            BinaryOp::Or => "||",
+            BinaryOp::BitAnd => "&",
+            BinaryOp::BitOr => "|",
+            BinaryOp::BitXor => "^",
+            BinaryOp::Shl => "<<",
+            BinaryOp::Shr => ">>",
+            BinaryOp::Instanceof => "instanceof",
+            BinaryOp::NullCoalesce => "??",
+        };
+        write!(f, "{s}")
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

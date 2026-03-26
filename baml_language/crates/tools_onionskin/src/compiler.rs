@@ -447,6 +447,7 @@ fn binop_sym(op: &baml_compiler2_ast::BinaryOp) -> &'static str {
         BinaryOp::Shl => "<<",
         BinaryOp::Shr => ">>",
         BinaryOp::Instanceof => "instanceof",
+        BinaryOp::NullCoalesce => "??",
     }
 }
 
@@ -585,11 +586,32 @@ fn expr_desc_spans<'db>(
             spans.extend(expr_desc_spans(*base, body, inference));
             spans.push(DetailSpan::Code(format!(".{field}")));
         }
+        Expr::OptionalFieldAccess { base, field } => {
+            spans.extend(expr_desc_spans(*base, body, inference));
+            spans.push(DetailSpan::Code(format!("?.{field}")));
+        }
         Expr::Index { base, index } => {
             spans.extend(expr_desc_spans(*base, body, inference));
             spans.push(DetailSpan::Code("[".into()));
             spans.extend(expr_desc_spans(*index, body, inference));
             spans.push(DetailSpan::Code("]".into()));
+        }
+        Expr::OptionalIndex { base, index } => {
+            spans.extend(expr_desc_spans(*base, body, inference));
+            spans.push(DetailSpan::Code("?.[".into()));
+            spans.extend(expr_desc_spans(*index, body, inference));
+            spans.push(DetailSpan::Code("]".into()));
+        }
+        Expr::OptionalCall { callee, args } => {
+            spans.extend(expr_desc_spans(*callee, body, inference));
+            spans.push(DetailSpan::Code("?.(".into()));
+            for (i, arg) in args.iter().enumerate() {
+                if i > 0 {
+                    spans.push(DetailSpan::Code(", ".into()));
+                }
+                spans.extend(expr_desc_spans(*arg, body, inference));
+            }
+            spans.push(DetailSpan::Code(")".into()));
         }
         Expr::If { condition, .. } => {
             spans.push(DetailSpan::Code("if (".into()));
@@ -613,6 +635,9 @@ fn expr_desc_spans<'db>(
         Expr::Throw { value } => {
             spans.push(DetailSpan::Code("throw ".into()));
             spans.extend(expr_desc_spans(*value, body, inference));
+        }
+        Expr::OptionalChain { expr } => {
+            spans.extend(expr_desc_spans(*expr, body, inference));
         }
         Expr::Missing => {
             spans.push(DetailSpan::Code("<missing>".into()));
@@ -1982,7 +2007,19 @@ impl CompilerRunner {
                     format!("{{ {} stmts{tail} }}", stmts.len())
                 }
                 Expr::FieldAccess { base, field } => format!("{}.{field}", expr_desc(*base, body)),
+                Expr::OptionalFieldAccess { base, field } => {
+                    format!("{}?.{field}", expr_desc(*base, body))
+                }
                 Expr::Index { base, .. } => format!("{}[...]", expr_desc(*base, body)),
+                Expr::OptionalIndex { base, .. } => format!("{}?.[...]", expr_desc(*base, body)),
+                Expr::OptionalCall { callee, args } => {
+                    let callee_str = expr_desc(*callee, body);
+                    format!(
+                        "{callee_str}?.({})",
+                        if args.is_empty() { "" } else { "..." }
+                    )
+                }
+                Expr::OptionalChain { expr } => expr_desc(*expr, body),
                 Expr::Missing => "<missing>".into(),
             }
         }

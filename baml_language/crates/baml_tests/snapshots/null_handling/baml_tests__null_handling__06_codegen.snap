@@ -1,0 +1,2385 @@
+---
+source: crates/baml_tests/src/generated_tests.rs
+---
+function user.Combined(user: User?, node: Node?, items: int[]?) -> string {
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L0
+    jump L7
+
+  L0:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L1
+    jump L7
+
+  L1:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L2
+    jump L7
+
+  L2:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L3
+    jump L7
+
+  L3:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L4
+    jump L7
+
+  L4:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L5
+    jump L7
+
+  L5:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L6
+    jump L7
+
+  L6:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const "street"
+    load_map_element
+    jump L8
+
+  L7:
+    load_const null
+
+  L8:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L9
+
+  L9:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L10
+    jump L16
+
+  L10:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L11
+    jump L16
+
+  L11:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L12
+    jump L16
+
+  L12:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L13
+    jump L14
+
+  L13:
+    load_var node
+    load_const "value"
+    load_map_element
+    store_var _34
+    jump L15
+
+  L14:
+    load_const null
+    store_var _34
+
+  L15:
+    load_var _34
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L16
+
+  L16:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L17
+    jump L20
+
+  L17:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L18
+    jump L20
+
+  L18:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L19
+    jump L20
+
+  L19:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    store_var _40
+    jump L21
+
+  L20:
+    load_const null
+    store_var _40
+
+  L21:
+    load_var _40
+    store_var _39
+    load_var _40
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L30
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L22
+    jump L29
+
+  L22:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L23
+    jump L29
+
+  L23:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L24
+    jump L29
+
+  L24:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const "name"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L25
+    jump L29
+
+  L25:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L26
+    jump L29
+
+  L26:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L27
+    jump L29
+
+  L27:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L28
+    jump L29
+
+  L28:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const "name"
+    load_map_element
+    load_const "value"
+    load_map_element
+    load_const "to_string"
+    load_map_element
+    call_indirect
+    store_var _39
+    jump L30
+
+  L29:
+    load_const null
+    store_var _39
+
+  L30:
+    load_var _39
+    store_var e3
+    load_var _39
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L31
+    load_const "fallback"
+    store_var e3
+
+  L31:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L32
+    jump L39
+
+  L32:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L33
+    jump L39
+
+  L33:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L34
+    jump L39
+
+  L34:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const 0
+    load_map_element
+    load_const "next"
+    load_map_element
+    store_var _74
+    load_var _74
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L35
+    jump L39
+
+  L35:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L36
+    jump L37
+
+  L36:
+    load_var user
+    load_const "id"
+    load_map_element
+    store_var _87
+    jump L38
+
+  L37:
+    load_const null
+    store_var _87
+
+  L38:
+    load_var _74
+    load_const "value"
+    load_var _87
+    store_map_element
+    load_var _87
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L39
+    load_var _74
+    load_const "value"
+    load_const 0
+    store_map_element
+
+  L39:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L40
+    jump L45
+
+  L40:
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L41
+    jump L42
+
+  L41:
+    load_var items
+    load_const 0
+    load_map_element
+    jump L43
+
+  L42:
+    load_const null
+
+  L43:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L44
+
+  L44:
+    load_var _91
+    load_const "value"
+    load_var node
+    load_const "value"
+    load_map_element
+    load_const 1
+    bin_op +
+    store_map_element
+
+  L45:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L46
+    jump L48
+
+  L46:
+    load_var node
+    load_const "next"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L47
+    jump L48
+
+  L47:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L48
+
+  L48:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L49
+    jump L61
+
+  L49:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L50
+    jump L61
+
+  L50:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L51
+    jump L61
+
+  L51:
+    load_var node
+    load_const "children"
+    load_map_element
+    store_var _109
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L52
+    jump L59
+
+  L52:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L53
+    jump L59
+
+  L53:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L54
+    jump L59
+
+  L54:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "scores"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L55
+    jump L59
+
+  L55:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L56
+    jump L59
+
+  L56:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L57
+    jump L59
+
+  L57:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L58
+    jump L59
+
+  L58:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "scores"
+    load_map_element
+    load_const 0
+    load_map_element
+    store_var _113
+    jump L60
+
+  L59:
+    load_const null
+    store_var _113
+
+  L60:
+    load_var _113
+    store_var _112
+    load_var _113
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L61
+    load_const 0
+    store_var _112
+
+  L61:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L62
+    jump L76
+
+  L62:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L63
+    jump L76
+
+  L63:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L64
+    jump L76
+
+  L64:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const "first"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L65
+    jump L76
+
+  L65:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L66
+    jump L76
+
+  L66:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L67
+    jump L76
+
+  L67:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L68
+    jump L76
+
+  L68:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const "first"
+    load_map_element
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L69
+    jump L76
+
+  L69:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L70
+    jump L76
+
+  L70:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L71
+    jump L76
+
+  L71:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L72
+    jump L76
+
+  L72:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const "first"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L73
+    jump L76
+
+  L73:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L74
+    jump L76
+
+  L74:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L75
+    jump L76
+
+  L75:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L76
+
+  L76:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L77
+    jump L83
+
+  L77:
+    load_var node
+    load_const "labels"
+    load_map_element
+    store_var _182
+    load_var _182
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L78
+    jump L83
+
+  L78:
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L79
+    jump L80
+
+  L79:
+    load_var items
+    load_const 0
+    load_map_element
+    jump L81
+
+  L80:
+    load_const null
+
+  L81:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L82
+
+  L82:
+    load_var _182
+    load_const "counter"
+    load_map_element
+    load_const "value"
+    load_const 0
+    load_const 1
+    bin_op +
+    store_map_element
+
+  L83:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L84
+    jump L90
+
+  L84:
+    load_var node
+    load_const "labels"
+    load_map_element
+    store_var _192
+    load_var _192
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L85
+    jump L90
+
+  L85:
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L86
+    jump L87
+
+  L86:
+    load_var items
+    load_const 0
+    load_map_element
+    jump L88
+
+  L87:
+    load_const null
+
+  L88:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L89
+
+  L89:
+    load_var _192
+    load_const "counter"
+    load_map_element
+    load_const "value"
+    load_var _192
+    load_const "counter"
+    load_map_element
+    load_const "value"
+    load_map_element
+    load_const 0
+    bin_op +
+    store_map_element
+
+  L90:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L91
+    jump L110
+
+  L91:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L92
+    jump L110
+
+  L92:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L93
+    jump L110
+
+  L93:
+    load_var node
+    load_const "children"
+    load_map_element
+    store_var _208
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L94
+    jump L95
+
+  L94:
+    load_var node
+    load_const "value"
+    load_map_element
+    store_var _212
+    jump L96
+
+  L95:
+    load_const null
+    store_var _212
+
+  L96:
+    load_var _212
+    store_var _211
+    load_var _212
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L97
+    load_const 0
+    store_var _211
+
+  L97:
+    load_var _208
+    load_var _211
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L98
+    jump L110
+
+  L98:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L99
+    jump L110
+
+  L99:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L100
+    jump L110
+
+  L100:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L101
+    jump L110
+
+  L101:
+    load_var node
+    load_const "children"
+    load_map_element
+    store_var _222
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L102
+    jump L103
+
+  L102:
+    load_var node
+    load_const "value"
+    load_map_element
+    store_var _226
+    jump L104
+
+  L103:
+    load_const null
+    store_var _226
+
+  L104:
+    load_var _226
+    store_var _225
+    load_var _226
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L105
+    load_const 0
+    store_var _225
+
+  L105:
+    load_var _222
+    load_var _225
+    load_map_element
+    load_const "next"
+    load_map_element
+    store_var _202
+    load_var _202
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L106
+    jump L110
+
+  L106:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L107
+    jump L108
+
+  L107:
+    load_var node
+    load_const "value"
+    load_map_element
+    store_var _233
+    jump L109
+
+  L108:
+    load_const null
+    store_var _233
+
+  L109:
+    load_var _202
+    load_const "value"
+    load_var _233
+    store_map_element
+    load_var _233
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L110
+    load_var _202
+    load_const "value"
+    load_const 0
+    store_map_element
+
+  L110:
+    load_var e3
+    return
+}
+
+function user.NullCoalescing(user: User?, fallback: string, count: int) -> string {
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L0
+    jump L3
+
+  L0:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L1
+    jump L3
+
+  L1:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L2
+    jump L3
+
+  L2:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    store_var _5
+    jump L4
+
+  L3:
+    load_const null
+    store_var _5
+
+  L4:
+    load_var _5
+    store_var d1
+    load_var _5
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L5
+    load_const "Anonymous"
+    store_var d1
+
+  L5:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L6
+    jump L9
+
+  L6:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L7
+    jump L9
+
+  L7:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L8
+    jump L9
+
+  L8:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    store_var _16
+    jump L10
+
+  L9:
+    load_const null
+    store_var _16
+
+  L10:
+    load_var _16
+    store_var _15
+    load_var _16
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L19
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L11
+    jump L18
+
+  L11:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L12
+    jump L18
+
+  L12:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L13
+    jump L18
+
+  L13:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L14
+    jump L18
+
+  L14:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L15
+    jump L18
+
+  L15:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L16
+    jump L18
+
+  L16:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L17
+    jump L18
+
+  L17:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const "street"
+    load_map_element
+    store_var _15
+    jump L19
+
+  L18:
+    load_const null
+    store_var _15
+
+  L19:
+    load_var _15
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L20
+
+  L20:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L21
+    jump L24
+
+  L21:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L22
+    jump L24
+
+  L22:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L23
+    jump L24
+
+  L23:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    jump L25
+
+  L24:
+    load_const null
+
+  L25:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L26
+
+  L26:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L27
+    jump L30
+
+  L27:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L28
+    jump L30
+
+  L28:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L29
+    jump L30
+
+  L29:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    jump L31
+
+  L30:
+    load_const null
+
+  L31:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L38
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L32
+    jump L38
+
+  L32:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L33
+    jump L38
+
+  L33:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L34
+    jump L38
+
+  L34:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L35
+    jump L38
+
+  L35:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L36
+    jump L38
+
+  L36:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L37
+    jump L38
+
+  L37:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L38
+
+  L38:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L39
+    jump L46
+
+  L39:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L40
+    jump L46
+
+  L40:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L41
+    jump L46
+
+  L41:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "scores"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L42
+    jump L46
+
+  L42:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L43
+    jump L46
+
+  L43:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L44
+    jump L46
+
+  L44:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L45
+    jump L46
+
+  L45:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "scores"
+    load_map_element
+    load_const 0
+    load_map_element
+    jump L47
+
+  L46:
+    load_const null
+
+  L47:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L48
+
+  L48:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L49
+    jump L52
+
+  L49:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L50
+    jump L52
+
+  L50:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L51
+    jump L52
+
+  L51:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    jump L53
+
+  L52:
+    load_const null
+
+  L53:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L54
+
+  L54:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L55
+    jump L66
+
+  L55:
+    load_var user
+    load_const "profile"
+    load_map_element
+    store_var _119
+    load_var _119
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L56
+    jump L66
+
+  L56:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L57
+    jump L64
+
+  L57:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L58
+    jump L64
+
+  L58:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L59
+    jump L64
+
+  L59:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L60
+    jump L64
+
+  L60:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L61
+    jump L64
+
+  L61:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L62
+    jump L64
+
+  L62:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L63
+    jump L64
+
+  L63:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const "street"
+    load_map_element
+    store_var _124
+    jump L65
+
+  L64:
+    load_const null
+    store_var _124
+
+  L65:
+    load_var _119
+    load_const "name"
+    load_var _124
+    store_map_element
+    load_var _124
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L66
+    load_var _119
+    load_const "name"
+    load_const "no street"
+    store_map_element
+
+  L66:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L67
+    jump L70
+
+  L67:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L68
+    jump L70
+
+  L68:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L69
+    jump L70
+
+  L69:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    jump L71
+
+  L70:
+    load_const null
+
+  L71:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L72
+
+  L72:
+    load_var count
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L73
+
+  L73:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L74
+    jump L77
+
+  L74:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L75
+    jump L77
+
+  L75:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L76
+    jump L77
+
+  L76:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    jump L78
+
+  L77:
+    load_const null
+
+  L78:
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L79
+
+  L79:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L80
+    jump L83
+
+  L80:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L81
+    jump L83
+
+  L81:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L82
+    jump L83
+
+  L82:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    jump L84
+
+  L83:
+    load_const null
+
+  L84:
+    pop_jump_if_false L85
+
+  L85:
+    load_var d1
+    return
+}
+
+function user.OptionalCall(callback: (int) -> string?, nonNullCb: (int) -> string, name: string?) -> string {
+    load_var callback
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L0
+    jump L1
+
+  L0:
+    load_const 42
+    load_var callback
+    call_indirect
+    store_var c1
+    jump L2
+
+  L1:
+    load_const null
+    store_var c1
+
+  L2:
+    load_var name
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L3
+    jump L4
+
+  L3:
+    load_const 42
+    load_var name
+    call_indirect
+    store_var c4
+    jump L5
+
+  L4:
+    load_const null
+    store_var c4
+
+  L5:
+    load_var nonNullCb
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L6
+    jump L7
+
+  L6:
+    load_const 42
+    load_var nonNullCb
+    call_indirect
+    store_var c5
+    jump L8
+
+  L7:
+    load_const null
+    store_var c5
+
+  L8:
+    load_var c1
+    store_var _10
+    load_var _10
+    store_var _0
+    load_var _10
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L9
+    load_const "default"
+    store_var _0
+
+  L9:
+    load_var _0
+    return
+}
+
+function user.OptionalChaining(user: User?, nonNullUser: User, node: Node?) -> string {
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L0
+
+  L0:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L1
+    jump L4
+
+  L1:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L2
+    jump L4
+
+  L2:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L3
+    jump L4
+
+  L3:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_map_element
+    store_var a2
+    jump L5
+
+  L4:
+    load_const null
+    store_var a2
+
+  L5:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L6
+    jump L12
+
+  L6:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L7
+    jump L12
+
+  L7:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L8
+    jump L12
+
+  L8:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L9
+    jump L12
+
+  L9:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L10
+    jump L12
+
+  L10:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L11
+    jump L12
+
+  L11:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L12
+
+  L12:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L13
+
+  L13:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L14
+
+  L14:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L15
+    jump L17
+
+  L15:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L16
+    jump L17
+
+  L16:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L17
+
+  L17:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L18
+
+  L18:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L19
+    jump L21
+
+  L19:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L20
+    jump L21
+
+  L20:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L21
+
+  L21:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L22
+    jump L28
+
+  L22:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L23
+    jump L28
+
+  L23:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L24
+    jump L28
+
+  L24:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L25
+    jump L28
+
+  L25:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L26
+    jump L28
+
+  L26:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L27
+    jump L28
+
+  L27:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L28
+
+  L28:
+    load_var nonNullUser
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L29
+
+  L29:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L30
+    jump L32
+
+  L30:
+    load_var user
+    load_const "profile"
+    load_map_element
+    store_var _88
+    load_var _88
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L31
+    jump L32
+
+  L31:
+    load_var _88
+    load_const "name"
+    load_const "updated"
+    store_map_element
+
+  L32:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L33
+    jump L37
+
+  L33:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L34
+    jump L37
+
+  L34:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L35
+    jump L37
+
+  L35:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const "address"
+    load_map_element
+    store_var _93
+    load_var _93
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L36
+    jump L37
+
+  L36:
+    load_var _93
+    load_const "street"
+    load_const "123 Main St"
+    store_map_element
+
+  L37:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L38
+    jump L39
+
+  L38:
+    load_var _104
+    load_const "profile"
+    load_map_element
+    load_const "name"
+    load_const "updated2"
+    store_map_element
+
+  L39:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L40
+    jump L41
+
+  L40:
+    load_var _108
+    load_const "id"
+    load_var user
+    load_const "id"
+    load_map_element
+    load_const 1
+    bin_op +
+    store_map_element
+
+  L41:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L42
+    jump L44
+
+  L42:
+    load_var user
+    load_const "profile"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L43
+    jump L44
+
+  L43:
+    load_var user
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L44
+
+  L44:
+    load_var a2
+    store_var _117
+    load_var _117
+    store_var _0
+    load_var _117
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L45
+    load_const "default"
+    store_var _0
+
+  L45:
+    load_var _0
+    return
+}
+
+function user.OptionalIndex(node: Node?, items: int[]?, lookup: map<string, int>?, nonNullItems: int[]) -> int {
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L0
+    jump L1
+
+  L0:
+    load_var items
+    load_const 0
+    load_map_element
+    store_var b1
+    jump L2
+
+  L1:
+    load_const null
+    store_var b1
+
+  L2:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L3
+    jump L5
+
+  L3:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L4
+    jump L5
+
+  L4:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L5
+
+  L5:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L6
+    jump L8
+
+  L6:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L7
+    jump L8
+
+  L7:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L8
+
+  L8:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L9
+    jump L15
+
+  L9:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L10
+    jump L15
+
+  L10:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L11
+    jump L15
+
+  L11:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const 0
+    load_map_element
+    load_const "next"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L12
+    jump L15
+
+  L12:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L13
+    jump L15
+
+  L13:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L14
+    jump L15
+
+  L14:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L15
+
+  L15:
+    load_var lookup
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L16
+
+  L16:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L17
+    jump L19
+
+  L17:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L18
+    jump L19
+
+  L18:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L19
+
+  L19:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L20
+    jump L22
+
+  L20:
+    load_var node
+    load_const "labels"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L21
+    jump L22
+
+  L21:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L22
+
+  L22:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L23
+
+  L23:
+    load_const null
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L24
+    jump L25
+
+  L24:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L25
+
+  L25:
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L26
+    jump L27
+
+  L26:
+    load_var items
+    load_const 0
+    load_map_element
+    jump L28
+
+  L27:
+    load_const null
+
+  L28:
+    load_const "to_string"
+    load_map_element
+    call_indirect
+    store_var b9
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L29
+    jump L32
+
+  L29:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L30
+    jump L32
+
+  L30:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L31
+    jump L32
+
+  L31:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L32
+
+  L32:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L33
+    jump L39
+
+  L33:
+    load_var node
+    load_const "children"
+    load_map_element
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L34
+    jump L39
+
+  L34:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L35
+    jump L39
+
+  L35:
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L36
+    jump L37
+
+  L36:
+    load_var items
+    load_const 0
+    load_map_element
+    store_var _100
+    jump L38
+
+  L37:
+    load_const null
+    store_var _100
+
+  L38:
+    load_var _100
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L39
+
+  L39:
+    load_var nonNullItems
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L40
+
+  L40:
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L41
+    jump L42
+
+  L41:
+    load_var _106
+    load_const 0
+    load_const 42
+    store_map_element
+
+  L42:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L43
+    jump L45
+
+  L43:
+    load_var node
+    load_const "children"
+    load_map_element
+    store_var _109
+    load_var _109
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L44
+    jump L45
+
+  L44:
+    load_var _109
+    load_const 0
+    load_map_element
+    load_const "value"
+    load_const 99
+    store_map_element
+
+  L45:
+    load_var lookup
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L46
+    jump L47
+
+  L46:
+    load_var _115
+    load_const "total"
+    load_const 100
+    store_map_element
+
+  L47:
+    load_var node
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L48
+    jump L50
+
+  L48:
+    load_var node
+    load_const "labels"
+    load_map_element
+    store_var _118
+    load_var _118
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L49
+    jump L50
+
+  L49:
+    load_var _118
+    load_const "main"
+    load_map_element
+    load_const "value"
+    load_const 50
+    store_map_element
+
+  L50:
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L51
+    jump L52
+
+  L51:
+    load_var _124
+    load_const 0
+    load_var items
+    load_const 0
+    load_map_element
+    load_const 10
+    bin_op +
+    store_map_element
+
+  L52:
+    load_var lookup
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L53
+    jump L54
+
+  L53:
+    load_var _127
+    load_const "total"
+    load_var lookup
+    load_const "total"
+    load_map_element
+    load_const 5
+    bin_op +
+    store_map_element
+
+  L54:
+    load_var items
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L55
+
+  L55:
+    load_var b1
+    store_var _131
+    load_var _131
+    store_var _0
+    load_var _131
+    load_const null
+    cmp_op ==
+    pop_jump_if_false L56
+    load_const 0
+    store_var _0
+
+  L56:
+    load_var _0
+    return
+}
