@@ -29,18 +29,16 @@ pub(crate) async fn build_request(
         | LlmProvider::OpenAiGeneric
         | LlmProvider::AzureOpenAi
         | LlmProvider::Ollama
-        | LlmProvider::OpenRouter => openai::chat_completions::build_request(client, prompt),
-        LlmProvider::OpenAiResponses => openai::responses::build_request(client, prompt),
-        LlmProvider::Anthropic => anthropic::build_request(client, prompt),
-        LlmProvider::AwsBedrock => bedrock::build_request(client, prompt).await,
+        | LlmProvider::OpenRouter => openai::chat_completions::build_request(client, &prompt),
+        LlmProvider::OpenAiResponses => openai::responses::build_request(client, &prompt),
+        LlmProvider::Anthropic => anthropic::build_request(client, &prompt),
+        LlmProvider::AwsBedrock => bedrock::build_request(client, &prompt).await,
         LlmProvider::GoogleAi
         | LlmProvider::VertexAi
         | LlmProvider::BamlFallback
-        | LlmProvider::BamlRoundRobin => {
-            Err(BuildRequestError::UnsupportedLlmProvider(
-                client.provider.clone(),
-            ))
-        }
+        | LlmProvider::BamlRoundRobin => Err(BuildRequestError::UnsupportedLlmProvider(
+            client.provider.clone(),
+        )),
     }?;
 
     // Auth is applied after body construction. Eventually this can be promoted

@@ -1,6 +1,6 @@
 //! Provider-specific authentication for LLM HTTP requests.
 //!
-//! Adds auth headers (API keys, bearer tokens, SigV4 signatures, etc.) to a
+//! Adds auth headers (API keys, bearer tokens, `SigV4` signatures, etc.) to a
 //! fully-built HTTP request.
 //!
 //! Today this is called as a final step inside `build_request::build_request`.
@@ -203,10 +203,7 @@ mod tests {
         auth_request(LlmProvider::OpenAiGeneric, &mut req, &client, None)
             .await
             .unwrap();
-        assert_eq!(
-            req.headers.get("authorization").unwrap(),
-            "Bearer sk-gen",
-        );
+        assert_eq!(req.headers.get("authorization").unwrap(), "Bearer sk-gen",);
     }
 
     #[tokio::test]
@@ -261,14 +258,8 @@ mod tests {
         auth_request(LlmProvider::OpenAi, &mut req, &client, None)
             .await
             .unwrap();
-        assert_eq!(
-            req.headers.get("content-type").unwrap(),
-            "application/json",
-        );
+        assert_eq!(req.headers.get("content-type").unwrap(), "application/json",);
         assert_eq!(req.headers.get("x-custom").unwrap(), "value");
-        assert_eq!(
-            req.headers.get("authorization").unwrap(),
-            "Bearer sk-test",
-        );
+        assert_eq!(req.headers.get("authorization").unwrap(), "Bearer sk-test",);
     }
 }

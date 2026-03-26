@@ -88,7 +88,7 @@ pub type FsReadFn = Arc<
         + RefUnwindSafe,
 >;
 
-/// IO callbacks needed by auth_request (especially Bedrock credential resolution).
+/// IO callbacks needed by `auth_request` (especially Bedrock credential resolution).
 ///
 /// These bridge the BAML runtime's IO capabilities into the auth pipeline,
 /// allowing credential resolution to work on both native and WASM targets.
@@ -152,7 +152,7 @@ pub fn execute_specialize_prompt_from_owned(
 /// Build an HTTP request from a prompt given already-extracted owned types.
 ///
 /// `callbacks` provides IO bridges for auth steps that need HTTP, env, or
-/// filesystem access (e.g. Bedrock SigV4 credential resolution). Pass `None`
+/// filesystem access (e.g. Bedrock `SigV4` credential resolution). Pass `None`
 /// when callbacks are unavailable -- providers that need them will fall back to
 /// the native AWS SDK provider chain (native only) or return an error (WASM).
 pub async fn execute_build_request_from_owned(

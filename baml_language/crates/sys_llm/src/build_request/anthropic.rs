@@ -44,13 +44,8 @@ enum ContentPart {
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 enum MediaSource {
-    Url {
-        url: String,
-    },
-    Base64 {
-        media_type: String,
-        data: String,
-    },
+    Url { url: String },
+    Base64 { media_type: String, data: String },
 }
 
 // ============================================================================
@@ -76,16 +71,17 @@ struct RequestBody {
 
 pub(crate) fn build_request(
     client: &crate::baml_std::PrimitiveClient,
-    prompt: bex_vm_types::PromptAst,
+    prompt: &bex_vm_types::PromptAst,
 ) -> Result<crate::baml_std::HttpRequest, super::BuildRequestError> {
     // Headers
     let mut headers = indexmap::IndexMap::new();
     headers.insert("content-type".to_string(), "application/json".to_string());
 
     // anthropic-version from provider_options (always set via provider_defaults)
-    let anthropic_opts = match &client.options.provider_options {
-        Some(crate::baml_std::ProviderOptions::Anthropic(opts)) => opts,
-        _ => unreachable!("anthropic provider_options should always be set for anthropic clients"),
+    let Some(crate::baml_std::ProviderOptions::Anthropic(anthropic_opts)) =
+        &client.options.provider_options
+    else {
+        unreachable!("anthropic provider_options should always be set for anthropic clients")
     };
     headers.insert(
         "anthropic-version".to_string(),
@@ -100,7 +96,7 @@ pub(crate) fn build_request(
     }
 
     // Body
-    let (system, messages) = extract_system_and_messages(&prompt)?;
+    let (system, messages) = extract_system_and_messages(prompt)?;
 
     let body = RequestBody {
         model: client.model.clone(),
@@ -174,7 +170,7 @@ fn extract_system_and_messages(
 
 /// Merge metadata key-value pairs into the `extra` map of the last content part.
 ///
-/// Anthropic uses this for features like cache_control, which is attached to
+/// Anthropic uses this for features like `cache_control`, which is attached to
 /// the last content block of a message.
 fn merge_metadata_into_last(parts: &mut [ContentPart], metadata: &serde_json::Value) {
     let serde_json::Value::Object(map) = metadata else {
@@ -203,9 +199,7 @@ fn anthropic_content_parts(
             text: s.clone(),
             extra: serde_json::Map::new(),
         }]),
-        PromptAstSimple::Media(media) => {
-            anthropic_media_part(media).map(|part| vec![part])
-        }
+        PromptAstSimple::Media(media) => anthropic_media_part(media).map(|part| vec![part]),
         PromptAstSimple::Multiple(items) => {
             let mut parts = Vec::new();
             for item in items {
@@ -216,9 +210,7 @@ fn anthropic_content_parts(
     }
 }
 
-fn anthropic_media_part(
-    media: &Arc<MediaValue>,
-) -> Result<ContentPart, super::BuildRequestError> {
+fn anthropic_media_part(media: &Arc<MediaValue>) -> Result<ContentPart, super::BuildRequestError> {
     let mime = super::mime_type_as_ok(media)?;
     let source = media.read_content(|c| content_to_media_source(c, mime))?;
 
@@ -298,7 +290,11 @@ mod tests {
         })
     }
 
-    fn msg_with_content(role: &str, content: PromptAstSimple, metadata: serde_json::Value) -> Arc<PromptAst> {
+    fn msg_with_content(
+        role: &str,
+        content: PromptAstSimple,
+        metadata: serde_json::Value,
+    ) -> Arc<PromptAst> {
         Arc::new(PromptAst::Message {
             role: role.to_string(),
             content: Arc::new(content),
@@ -306,9 +302,7 @@ mod tests {
         })
     }
 
-    fn make_client(
-        options: Vec<(&str, BexExternalValue)>,
-    ) -> crate::baml_std::PrimitiveClient {
+    fn make_client(options: Vec<(&str, BexExternalValue)>) -> crate::baml_std::PrimitiveClient {
         let mut request_body = IndexMap::new();
         let mut model = None;
         for (k, v) in options {
@@ -320,7 +314,9 @@ mod tests {
                 request_body.insert(k.to_string(), v);
             }
         }
-        let defaults = crate::baml_std::PrimitiveClientOptions::provider_defaults(crate::LlmProvider::Anthropic);
+        let defaults = crate::baml_std::PrimitiveClientOptions::provider_defaults(
+            crate::LlmProvider::Anthropic,
+        );
         crate::baml_std::PrimitiveClient::new(
             "test".to_string(),
             "anthropic".to_string(),
@@ -342,7 +338,10 @@ mod tests {
     fn anthropic_image_url() {
         let media = make_media(
             MediaKind::Image,
-            MediaContent::Url { url: "https://example.com/img.png".into(), base64_data: None },
+            MediaContent::Url {
+                url: "https://example.com/img.png".into(),
+                base64_data: None,
+            },
             Some("image/png"),
         );
         let part = anthropic_media_part(&media).unwrap();
@@ -359,7 +358,9 @@ mod tests {
     fn anthropic_image_base64() {
         let media = make_media(
             MediaKind::Image,
-            MediaContent::Base64 { base64_data: "abc123".into() },
+            MediaContent::Base64 {
+                base64_data: "abc123".into(),
+            },
             Some("image/jpeg"),
         );
         let part = anthropic_media_part(&media).unwrap();
@@ -376,7 +377,10 @@ mod tests {
     fn anthropic_image_file_with_base64_data() {
         let media = make_media(
             MediaKind::Image,
-            MediaContent::File { file: "test.png".into(), base64_data: Some("resolved_data".into()) },
+            MediaContent::File {
+                file: "test.png".into(),
+                base64_data: Some("resolved_data".into()),
+            },
             Some("image/png"),
         );
         let part = anthropic_media_part(&media).unwrap();
@@ -393,7 +397,10 @@ mod tests {
     fn anthropic_image_file_not_resolved_error() {
         let media = make_media(
             MediaKind::Image,
-            MediaContent::File { file: "test.png".into(), base64_data: None },
+            MediaContent::File {
+                file: "test.png".into(),
+                base64_data: None,
+            },
             Some("image/png"),
         );
         let result = anthropic_media_part(&media);
@@ -405,7 +412,10 @@ mod tests {
     fn anthropic_audio_url() {
         let media = make_media(
             MediaKind::Audio,
-            MediaContent::Url { url: "https://example.com/audio.wav".into(), base64_data: None },
+            MediaContent::Url {
+                url: "https://example.com/audio.wav".into(),
+                base64_data: None,
+            },
             Some("audio/wav"),
         );
         let part = anthropic_media_part(&media).unwrap();
@@ -422,7 +432,9 @@ mod tests {
     fn anthropic_audio_base64() {
         let media = make_media(
             MediaKind::Audio,
-            MediaContent::Base64 { base64_data: "audiodata".into() },
+            MediaContent::Base64 {
+                base64_data: "audiodata".into(),
+            },
             Some("audio/wav"),
         );
         let part = anthropic_media_part(&media).unwrap();
@@ -460,7 +472,10 @@ mod tests {
     fn anthropic_pdf_url() {
         let media = make_media(
             MediaKind::Pdf,
-            MediaContent::Url { url: "https://example.com/doc.pdf".into(), base64_data: None },
+            MediaContent::Url {
+                url: "https://example.com/doc.pdf".into(),
+                base64_data: None,
+            },
             Some("application/pdf"),
         );
         let part = anthropic_media_part(&media).unwrap();
@@ -477,7 +492,9 @@ mod tests {
     fn anthropic_pdf_base64() {
         let media = make_media(
             MediaKind::Pdf,
-            MediaContent::Base64 { base64_data: "pdfdata".into() },
+            MediaContent::Base64 {
+                base64_data: "pdfdata".into(),
+            },
             Some("application/pdf"),
         );
         let part = anthropic_media_part(&media).unwrap();
@@ -494,7 +511,9 @@ mod tests {
     fn anthropic_video_unsupported() {
         let media = make_media(
             MediaKind::Video,
-            MediaContent::Base64 { base64_data: "videodata".into() },
+            MediaContent::Base64 {
+                base64_data: "videodata".into(),
+            },
             Some("video/mp4"),
         );
         let result = anthropic_media_part(&media);
@@ -508,11 +527,12 @@ mod tests {
 
     #[test]
     fn anthropic_single_user_message() {
-        let client = make_client(vec![
-            ("model", BexExternalValue::String("claude-3-haiku-20240307".into())),
-        ]);
+        let client = make_client(vec![(
+            "model",
+            BexExternalValue::String("claude-3-haiku-20240307".into()),
+        )]);
         let prompt = msg("user", "Hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, &prompt).unwrap();
         let body: serde_json::Value = serde_json::from_str(&result.body).unwrap();
         assert_eq!(
             body,
@@ -528,15 +548,16 @@ mod tests {
 
     #[test]
     fn anthropic_three_role_conversation() {
-        let client = make_client(vec![
-            ("model", BexExternalValue::String("claude-3-haiku-20240307".into())),
-        ]);
+        let client = make_client(vec![(
+            "model",
+            BexExternalValue::String("claude-3-haiku-20240307".into()),
+        )]);
         let prompt = Arc::new(PromptAst::Vec(vec![
             msg("system", "You are helpful."),
             msg("user", "Hi"),
             msg("assistant", "Hello!"),
         ]));
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, &prompt).unwrap();
         let body: serde_json::Value = serde_json::from_str(&result.body).unwrap();
         assert_eq!(
             body,
@@ -554,9 +575,10 @@ mod tests {
 
     #[test]
     fn anthropic_multi_turn_conversation() {
-        let client = make_client(vec![
-            ("model", BexExternalValue::String("claude-3-haiku-20240307".into())),
-        ]);
+        let client = make_client(vec![(
+            "model",
+            BexExternalValue::String("claude-3-haiku-20240307".into()),
+        )]);
         let prompt = Arc::new(PromptAst::Vec(vec![
             msg("system", "You are helpful."),
             msg("user", "Hi"),
@@ -564,7 +586,7 @@ mod tests {
             msg("user", "How are you?"),
             msg("assistant", "I'm well."),
         ]));
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, &prompt).unwrap();
         let body: serde_json::Value = serde_json::from_str(&result.body).unwrap();
         assert_eq!(
             body,
@@ -584,15 +606,16 @@ mod tests {
 
     #[test]
     fn anthropic_metadata_merged_to_last_part() {
-        let client = make_client(vec![
-            ("model", BexExternalValue::String("claude-3-haiku-20240307".into())),
-        ]);
+        let client = make_client(vec![(
+            "model",
+            BexExternalValue::String("claude-3-haiku-20240307".into()),
+        )]);
         let prompt = msg_with_metadata(
             "user",
             "hello",
             serde_json::json!({"cache_control": {"type": "ephemeral"}}),
         );
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, &prompt).unwrap();
         let body: serde_json::Value = serde_json::from_str(&result.body).unwrap();
         assert_eq!(
             body,
@@ -611,15 +634,16 @@ mod tests {
 
     #[test]
     fn anthropic_multiple_system_messages_combined() {
-        let client = make_client(vec![
-            ("model", BexExternalValue::String("claude-3-haiku-20240307".into())),
-        ]);
+        let client = make_client(vec![(
+            "model",
+            BexExternalValue::String("claude-3-haiku-20240307".into()),
+        )]);
         let prompt = Arc::new(PromptAst::Vec(vec![
             msg("system", "You are helpful."),
             msg("system", "Be concise."),
             msg("user", "Hi"),
         ]));
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, &prompt).unwrap();
         let body: serde_json::Value = serde_json::from_str(&result.body).unwrap();
         assert_eq!(
             body,
@@ -639,15 +663,16 @@ mod tests {
 
     #[test]
     fn anthropic_system_metadata_merged_to_last_part() {
-        let client = make_client(vec![
-            ("model", BexExternalValue::String("claude-3-haiku-20240307".into())),
-        ]);
+        let client = make_client(vec![(
+            "model",
+            BexExternalValue::String("claude-3-haiku-20240307".into()),
+        )]);
         let prompt = msg_with_metadata(
             "system",
             "cached prompt",
             serde_json::json!({"cache_control": {"type": "ephemeral"}}),
         );
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, &prompt).unwrap();
         let body: serde_json::Value = serde_json::from_str(&result.body).unwrap();
         assert_eq!(
             body,
@@ -664,12 +689,16 @@ mod tests {
 
     #[test]
     fn anthropic_mixed_text_and_image() {
-        let client = make_client(vec![
-            ("model", BexExternalValue::String("claude-3-haiku-20240307".into())),
-        ]);
+        let client = make_client(vec![(
+            "model",
+            BexExternalValue::String("claude-3-haiku-20240307".into()),
+        )]);
         let media = make_media(
             MediaKind::Image,
-            MediaContent::Url { url: "https://example.com/img.png".into(), base64_data: None },
+            MediaContent::Url {
+                url: "https://example.com/img.png".into(),
+                base64_data: None,
+            },
             Some("image/png"),
         );
         let prompt = msg_with_content(
@@ -680,7 +709,7 @@ mod tests {
             ]),
             serde_json::Value::Null,
         );
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, &prompt).unwrap();
         let body: serde_json::Value = serde_json::from_str(&result.body).unwrap();
         assert_eq!(
             body,
@@ -702,11 +731,12 @@ mod tests {
 
     #[test]
     fn anthropic_version_header_from_provider_defaults() {
-        let client = make_client(vec![
-            ("model", BexExternalValue::String("claude-3-haiku-20240307".into())),
-        ]);
+        let client = make_client(vec![(
+            "model",
+            BexExternalValue::String("claude-3-haiku-20240307".into()),
+        )]);
         let prompt = msg("user", "hello");
-        let result = build_request(&client, prompt).unwrap();
+        let result = build_request(&client, &prompt).unwrap();
         assert_eq!(
             result.headers.get("anthropic-version").unwrap(),
             "2023-06-01"

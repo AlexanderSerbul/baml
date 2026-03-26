@@ -162,9 +162,9 @@ pub(super) fn consolidate_system_prompts(
 pub(super) fn validate_and_remap_roles(
     prompt: bex_vm_types::PromptAst,
     allowed_roles: &[String],
-    remap: &Option<indexmap::IndexMap<String, String>>,
+    remap: Option<&indexmap::IndexMap<String, String>>,
 ) -> Result<bex_vm_types::PromptAst, super::SpecializePromptError> {
-    validate_and_remap_recursive(prompt, allowed_roles, remap.as_ref())
+    validate_and_remap_recursive(prompt, allowed_roles, remap)
 }
 
 fn validate_and_remap_recursive(
@@ -184,10 +184,7 @@ fn validate_and_remap_recursive(
                     allowed: allowed_roles.to_vec(),
                 });
             }
-            let new_role = remap
-                .and_then(|m| m.get(role))
-                .unwrap_or(role)
-                .clone();
+            let new_role = remap.and_then(|m| m.get(role)).unwrap_or(role).clone();
             Ok(Arc::new(PromptAst::Message {
                 role: new_role,
                 content: content.clone(),
@@ -512,7 +509,7 @@ mod tests {
     #[test]
     fn test_validate_and_remap_no_remap() {
         let prompt = msg("user", "Hello");
-        let result = validate_and_remap_roles(prompt.clone(), &allowed(&["user"]), &None).unwrap();
+        let result = validate_and_remap_roles(prompt.clone(), &allowed(&["user"]), None).unwrap();
         assert_eq!(result, prompt);
     }
 
@@ -522,7 +519,7 @@ mod tests {
         let result = validate_and_remap_roles(
             prompt.clone(),
             &allowed(&["user"]),
-            &Some(indexmap::IndexMap::new()),
+            Some(&indexmap::IndexMap::new()),
         )
         .unwrap();
         assert_eq!(result, prompt);
@@ -533,8 +530,7 @@ mod tests {
         let mut map = indexmap::IndexMap::new();
         map.insert("user".to_string(), "human".to_string());
         let prompt = msg("user", "Hello");
-        let result =
-            validate_and_remap_roles(prompt, &allowed(&["user"]), &Some(map)).unwrap();
+        let result = validate_and_remap_roles(prompt, &allowed(&["user"]), Some(&map)).unwrap();
         assert_eq!(result, msg("human", "Hello"));
     }
 
@@ -573,12 +569,8 @@ mod tests {
             msg("system", "Be helpful"),
             msg("user", "Hello"),
         ]));
-        let result = validate_and_remap_roles(
-            prompt,
-            &allowed(&["system", "user"]),
-            &Some(map),
-        )
-        .unwrap();
+        let result =
+            validate_and_remap_roles(prompt, &allowed(&["system", "user"]), Some(&map)).unwrap();
         let expected = Arc::new(PromptAst::Vec(vec![
             msg("system", "Be helpful"),
             msg("human", "Hello"),
@@ -589,7 +581,7 @@ mod tests {
     #[test]
     fn test_validate_rejects_disallowed_role() {
         let prompt = msg("admin", "Hello");
-        let result = validate_and_remap_roles(prompt, &allowed(&["user", "assistant"]), &None);
+        let result = validate_and_remap_roles(prompt, &allowed(&["user", "assistant"]), None);
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("admin"));
     }

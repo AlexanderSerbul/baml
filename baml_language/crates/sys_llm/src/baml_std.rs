@@ -14,11 +14,11 @@ pub enum ClientError {
 pub struct PrimitiveClient {
     pub name: String,
     pub provider: String,
-    /// Fully resolved request URL (base_url + provider path suffix).
+    /// Fully resolved request URL (`base_url` + provider path suffix).
     pub url: String,
     /// Resolved model name (falls back to empty string).
     pub model: String,
-    /// Resolved max_tokens (None if not set by user or provider default).
+    /// Resolved `max_tokens` (None if not set by user or provider default).
     pub max_tokens: Option<i64>,
     /// Resolved default role (falls back to "system").
     pub default_role: String,
@@ -44,14 +44,11 @@ impl PrimitiveClient {
         let model = options.model.clone().unwrap_or_default();
         let url = match llm_provider {
             LlmProvider::AzureOpenAi => {
-                let azure = match &options.provider_options {
-                    Some(ProviderOptions::AzureOpenAi(opts)) => opts,
-                    _ => {
-                        return Err(ClientError::MissingOption {
-                            client: name,
-                            option: "api_version".into(),
-                        });
-                    }
+                let Some(ProviderOptions::AzureOpenAi(azure)) = &options.provider_options else {
+                    return Err(ClientError::MissingOption {
+                        client: name,
+                        option: "api_version".into(),
+                    });
                 };
                 let base = match (
                     &options.base_url,
@@ -79,9 +76,7 @@ impl PrimitiveClient {
                 if let Some(endpoint) = &bedrock_opts.endpoint_url {
                     format!("{endpoint}/model/{model}/converse")
                 } else if let Some(region) = &bedrock_opts.region {
-                    format!(
-                        "https://bedrock-runtime.{region}.amazonaws.com/model/{model}/converse"
-                    )
+                    format!("https://bedrock-runtime.{region}.amazonaws.com/model/{model}/converse")
                 } else {
                     // Region will need to be resolved later; store a placeholder.
                     // The build_request step will error if region is still unknown.
@@ -271,11 +266,12 @@ impl PrimitiveClientOptions {
             LlmProvider::GoogleAi
             | LlmProvider::VertexAi
             | LlmProvider::BamlFallback
-            | LlmProvider::BamlRoundRobin => Default::default(),
+            | LlmProvider::BamlRoundRobin => PrimitiveClientOptions::default(),
         }
     }
 
     /// Merge user-specified values on top of defaults. User values take precedence.
+    #[must_use]
     pub fn with_defaults(self, defaults: Self) -> Self {
         Self {
             model: self.model.or(defaults.model),

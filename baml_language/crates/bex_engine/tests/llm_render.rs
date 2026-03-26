@@ -23,10 +23,8 @@ async fn test_render_prompt_directly() {
     );
     args.insert("age".to_string(), BexExternalValue::Int(30));
 
-    let client = sys_llm::baml_std::PrimitiveClient::new(
-        "test".to_string(),
-        "openai".to_string(),
-        {
+    let client =
+        sys_llm::baml_std::PrimitiveClient::new("test".to_string(), "openai".to_string(), {
             let opts = sys_llm::baml_std::PrimitiveClientOptions {
                 default_role: Some("user".to_string()),
                 allowed_roles: Some(vec![
@@ -36,10 +34,12 @@ async fn test_render_prompt_directly() {
                 ]),
                 ..Default::default()
             };
-            let defaults = sys_llm::baml_std::PrimitiveClientOptions::provider_defaults(sys_llm::LlmProvider::OpenAi);
+            let defaults = sys_llm::baml_std::PrimitiveClientOptions::provider_defaults(
+                sys_llm::LlmProvider::OpenAi,
+            );
             opts.with_defaults(defaults)
-        },
-    ).unwrap();
+        })
+        .unwrap();
 
     let ctx = sys_llm::RenderContext {
         client: sys_llm::RenderContextClient {
@@ -84,10 +84,8 @@ You are a helpful assistant.
         BexExternalValue::String("What is 2+2?".to_string()),
     );
 
-    let client = sys_llm::baml_std::PrimitiveClient::new(
-        "test".to_string(),
-        "openai".to_string(),
-        {
+    let client =
+        sys_llm::baml_std::PrimitiveClient::new("test".to_string(), "openai".to_string(), {
             let opts = sys_llm::baml_std::PrimitiveClientOptions {
                 default_role: Some("user".to_string()),
                 allowed_roles: Some(vec![
@@ -97,10 +95,12 @@ You are a helpful assistant.
                 ]),
                 ..Default::default()
             };
-            let defaults = sys_llm::baml_std::PrimitiveClientOptions::provider_defaults(sys_llm::LlmProvider::OpenAi);
+            let defaults = sys_llm::baml_std::PrimitiveClientOptions::provider_defaults(
+                sys_llm::LlmProvider::OpenAi,
+            );
             opts.with_defaults(defaults)
-        },
-    ).unwrap();
+        })
+        .unwrap();
 
     let ctx = sys_llm::RenderContext {
         client: sys_llm::RenderContextClient {

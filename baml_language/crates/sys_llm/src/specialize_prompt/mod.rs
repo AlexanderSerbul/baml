@@ -4,7 +4,7 @@
 //! 1. Wrap simple nodes as messages with the default role
 //! 2. Merge adjacent same-role messages
 //! 3. Consolidate system prompts
-//! 4. Validate roles against allowed_roles, then remap
+//! 4. Validate roles against `allowed_roles`, then remap
 //! 5. Filter metadata
 
 mod transformations;
@@ -27,7 +27,7 @@ pub(crate) fn specialize_prompt_from_owned(
     let prompt = transformations::validate_and_remap_roles(
         prompt,
         &client.allowed_roles,
-        &client.options.remap_roles,
+        client.options.remap_roles.as_ref(),
     )?;
 
     Ok(transformations::filter_metadata(prompt, &features))

@@ -1,4 +1,4 @@
-//! OpenAI Responses API body builder.
+//! `OpenAI` Responses API body builder.
 //!
 //! Builds the JSON body for the `/v1/responses` endpoint.
 
@@ -70,7 +70,7 @@ struct RequestBody {
 
 pub(crate) fn build_request(
     client: &crate::baml_std::PrimitiveClient,
-    prompt: bex_vm_types::PromptAst,
+    prompt: &bex_vm_types::PromptAst,
 ) -> Result<crate::baml_std::HttpRequest, crate::build_request::BuildRequestError> {
     // Headers
     let mut headers = indexmap::IndexMap::new();
@@ -82,7 +82,7 @@ pub(crate) fn build_request(
     // Body
     let body = RequestBody {
         model: client.model.clone(),
-        input: prompt_to_responses_input(&prompt)?,
+        input: prompt_to_responses_input(prompt)?,
         max_output_tokens: client.max_tokens,
         extra: client.extra_body.clone(),
     };
@@ -150,18 +150,12 @@ fn responses_content_parts(
     match content {
         PromptAstSimple::String(s) => {
             if is_assistant {
-                Ok(vec![ResponsesContentPart::OutputText {
-                    text: s.clone(),
-                }])
+                Ok(vec![ResponsesContentPart::OutputText { text: s.clone() }])
             } else {
-                Ok(vec![ResponsesContentPart::InputText {
-                    text: s.clone(),
-                }])
+                Ok(vec![ResponsesContentPart::InputText { text: s.clone() }])
             }
         }
-        PromptAstSimple::Media(media) => {
-            responses_media_part(media).map(|part| vec![part])
-        }
+        PromptAstSimple::Media(media) => responses_media_part(media).map(|part| vec![part]),
         PromptAstSimple::Multiple(items) => {
             let mut parts = Vec::new();
             for item in items {
@@ -199,7 +193,7 @@ fn responses_media_part(
             })
         }),
         MediaKind::Generic => Err(crate::build_request::BuildRequestError::UnsupportedMedia(
-            format!("generic media kind not supported by OpenAI Responses API"),
+            "generic media kind not supported by OpenAI Responses API".to_string(),
         )),
     }
 }
@@ -282,98 +276,134 @@ mod tests {
     fn responses_image_url() {
         let media = make_media(
             MediaKind::Image,
-            MediaContent::Url { url: "https://example.com/img.png".into(), base64_data: None },
+            MediaContent::Url {
+                url: "https://example.com/img.png".into(),
+                base64_data: None,
+            },
             Some("image/png"),
         );
         let part = responses_media_part(&media).unwrap();
         let json = serde_json::to_value(&part).unwrap();
-        assert_eq!(json, serde_json::json!({
-            "type": "input_image",
-            "image_url": "https://example.com/img.png"
-        }));
+        assert_eq!(
+            json,
+            serde_json::json!({
+                "type": "input_image",
+                "image_url": "https://example.com/img.png"
+            })
+        );
     }
 
     #[test]
     fn responses_image_base64() {
         let media = make_media(
             MediaKind::Image,
-            MediaContent::Base64 { base64_data: "abc123".into() },
+            MediaContent::Base64 {
+                base64_data: "abc123".into(),
+            },
             Some("image/jpeg"),
         );
         let part = responses_media_part(&media).unwrap();
         let json = serde_json::to_value(&part).unwrap();
-        assert_eq!(json, serde_json::json!({
-            "type": "input_image",
-            "image_url": "data:image/jpeg;base64,abc123"
-        }));
+        assert_eq!(
+            json,
+            serde_json::json!({
+                "type": "input_image",
+                "image_url": "data:image/jpeg;base64,abc123"
+            })
+        );
     }
 
     #[test]
     fn responses_audio_base64() {
         let media = make_media(
             MediaKind::Audio,
-            MediaContent::Base64 { base64_data: "audiodata".into() },
+            MediaContent::Base64 {
+                base64_data: "audiodata".into(),
+            },
             Some("audio/mp3"),
         );
         let part = responses_media_part(&media).unwrap();
         let json = serde_json::to_value(&part).unwrap();
-        assert_eq!(json, serde_json::json!({
-            "type": "input_audio",
-            "data": "audiodata",
-            "format": "mp3"
-        }));
+        assert_eq!(
+            json,
+            serde_json::json!({
+                "type": "input_audio",
+                "data": "audiodata",
+                "format": "mp3"
+            })
+        );
     }
 
     #[test]
     fn responses_pdf_url() {
         let media = make_media(
             MediaKind::Pdf,
-            MediaContent::Url { url: "https://example.com/doc.pdf".into(), base64_data: None },
+            MediaContent::Url {
+                url: "https://example.com/doc.pdf".into(),
+                base64_data: None,
+            },
             Some("application/pdf"),
         );
         let part = responses_media_part(&media).unwrap();
         let json = serde_json::to_value(&part).unwrap();
-        assert_eq!(json, serde_json::json!({
-            "type": "input_file",
-            "file_data": "https://example.com/doc.pdf"
-        }));
+        assert_eq!(
+            json,
+            serde_json::json!({
+                "type": "input_file",
+                "file_data": "https://example.com/doc.pdf"
+            })
+        );
     }
 
     #[test]
     fn responses_pdf_base64() {
         let media = make_media(
             MediaKind::Pdf,
-            MediaContent::Base64 { base64_data: "pdfdata".into() },
+            MediaContent::Base64 {
+                base64_data: "pdfdata".into(),
+            },
             Some("application/pdf"),
         );
         let part = responses_media_part(&media).unwrap();
         let json = serde_json::to_value(&part).unwrap();
-        assert_eq!(json, serde_json::json!({
-            "type": "input_file",
-            "file_data": "data:application/pdf;base64,pdfdata"
-        }));
+        assert_eq!(
+            json,
+            serde_json::json!({
+                "type": "input_file",
+                "file_data": "data:application/pdf;base64,pdfdata"
+            })
+        );
     }
 
     #[test]
     fn responses_image_file_with_base64_data() {
         let media = make_media(
             MediaKind::Image,
-            MediaContent::File { file: "test.png".into(), base64_data: Some("resolved_img".into()) },
+            MediaContent::File {
+                file: "test.png".into(),
+                base64_data: Some("resolved_img".into()),
+            },
             Some("image/png"),
         );
         let part = responses_media_part(&media).unwrap();
         let json = serde_json::to_value(&part).unwrap();
-        assert_eq!(json, serde_json::json!({
-            "type": "input_image",
-            "image_url": "data:image/png;base64,resolved_img"
-        }));
+        assert_eq!(
+            json,
+            serde_json::json!({
+                "type": "input_image",
+                "image_url": "data:image/png;base64,resolved_img"
+            })
+        );
     }
 
     #[test]
     fn responses_image_file_not_resolved_error() {
         let media = make_media(
             MediaKind::Image,
-            MediaContent::File { file: "test.png".into(), base64_data: None },
+            MediaContent::File {
+                file: "test.png".into(),
+                base64_data: None,
+            },
             Some("image/png"),
         );
         let result = responses_media_part(&media);
@@ -385,22 +415,31 @@ mod tests {
     fn responses_pdf_file_with_base64_data() {
         let media = make_media(
             MediaKind::Pdf,
-            MediaContent::File { file: "doc.pdf".into(), base64_data: Some("resolved_pdf".into()) },
+            MediaContent::File {
+                file: "doc.pdf".into(),
+                base64_data: Some("resolved_pdf".into()),
+            },
             Some("application/pdf"),
         );
         let part = responses_media_part(&media).unwrap();
         let json = serde_json::to_value(&part).unwrap();
-        assert_eq!(json, serde_json::json!({
-            "type": "input_file",
-            "file_data": "data:application/pdf;base64,resolved_pdf"
-        }));
+        assert_eq!(
+            json,
+            serde_json::json!({
+                "type": "input_file",
+                "file_data": "data:application/pdf;base64,resolved_pdf"
+            })
+        );
     }
 
     #[test]
     fn responses_pdf_file_not_resolved_error() {
         let media = make_media(
             MediaKind::Pdf,
-            MediaContent::File { file: "doc.pdf".into(), base64_data: None },
+            MediaContent::File {
+                file: "doc.pdf".into(),
+                base64_data: None,
+            },
             Some("application/pdf"),
         );
         let result = responses_media_part(&media);
@@ -412,13 +451,18 @@ mod tests {
     fn responses_video_unsupported() {
         let media = make_media(
             MediaKind::Video,
-            MediaContent::Base64 { base64_data: "videodata".into() },
+            MediaContent::Base64 {
+                base64_data: "videodata".into(),
+            },
             Some("video/mp4"),
         );
         // Video is handled via the file path (same as PDF in responses)
         let part = responses_media_part(&media).unwrap();
         let json = serde_json::to_value(&part).unwrap();
-        assert_eq!(json, serde_json::json!({"type": "input_file", "file_data": "data:video/mp4;base64,videodata"}));
+        assert_eq!(
+            json,
+            serde_json::json!({"type": "input_file", "file_data": "data:video/mp4;base64,videodata"})
+        );
     }
 
     // ========================================================================
@@ -430,7 +474,10 @@ mod tests {
         let content = PromptAstSimple::String("hello".into());
         let parts = responses_content_parts(&content, true).unwrap();
         let json = serde_json::to_value(&parts[0]).unwrap();
-        assert_eq!(json, serde_json::json!({"type": "output_text", "text": "hello"}));
+        assert_eq!(
+            json,
+            serde_json::json!({"type": "output_text", "text": "hello"})
+        );
     }
 
     #[test]
@@ -438,7 +485,10 @@ mod tests {
         let content = PromptAstSimple::String("hello".into());
         let parts = responses_content_parts(&content, false).unwrap();
         let json = serde_json::to_value(&parts[0]).unwrap();
-        assert_eq!(json, serde_json::json!({"type": "input_text", "text": "hello"}));
+        assert_eq!(
+            json,
+            serde_json::json!({"type": "input_text", "text": "hello"})
+        );
     }
 
     #[test]

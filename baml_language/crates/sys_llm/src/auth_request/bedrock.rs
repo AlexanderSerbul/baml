@@ -1,4 +1,4 @@
-//! AWS Bedrock request authorization: credential resolution + SigV4 signing.
+//! AWS Bedrock request authorization: credential resolution + `SigV4` signing.
 
 #[allow(clippy::disallowed_types)]
 use std::time::SystemTime;
@@ -260,7 +260,7 @@ fn baml_http_client(send_fn: HttpSendFn) -> aws_smithy_runtime_api::client::http
 
 /// Load the AWS SDK config using the provided callbacks for IO.
 async fn load_aws_sdk_config_with_callbacks(
-    bedrock_opts: &BedrockOptions,
+    #[cfg_attr(target_arch = "wasm32", allow(unused))] bedrock_opts: &BedrockOptions,
     callbacks: &BuildRequestCallbacks,
 ) -> aws_config::SdkConfig {
     #[cfg(not(target_arch = "wasm32"))]
@@ -298,7 +298,7 @@ async fn load_aws_sdk_config_with_callbacks(
 // Public entry point
 // ---------------------------------------------------------------------------
 
-/// Add SigV4 auth headers to a Bedrock request.
+/// Add `SigV4` auth headers to a Bedrock request.
 pub(crate) async fn auth_bedrock(
     request: &mut HttpRequest,
     client: &PrimitiveClient,
@@ -399,8 +399,8 @@ async fn resolve_credentials(
     #[cfg(target_arch = "wasm32")]
     {
         Err(BuildRequestError::AuthorizationFailed(
-            "AWS Bedrock on WASM requires either explicit credentials \
-             (access_key_id + secret_access_key) or BuildRequestCallbacks"
+            "AWS Bedrock on WASM requires explicit credentials \
+             (access_key_id + secret_access_key)"
                 .into(),
         ))
     }
@@ -423,7 +423,7 @@ fn credentials_from_options(opts: &BedrockOptions) -> Option<Credentials> {
 // SigV4 signing
 // ---------------------------------------------------------------------------
 
-/// Sign the request with SigV4 given resolved credentials and region.
+/// Sign the request with `SigV4` given resolved credentials and region.
 fn sign_with_credentials(
     credentials: &Credentials,
     region: &str,

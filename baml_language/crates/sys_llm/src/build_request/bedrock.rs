@@ -4,7 +4,7 @@
 //! (image, video, audio, PDF) are supported. Body serialization is delegated
 //! to the `aws-sdk-bedrockruntime` crate via a dry-run interception pattern.
 //!
-//! Auth (SigV4 signing, credential resolution) is NOT handled here -- that
+//! Auth (`SigV4` signing, credential resolution) is NOT handled here -- that
 //! belongs in `auth_request`.
 
 use std::sync::Arc;
@@ -27,16 +27,10 @@ use super::BuildRequestError;
 
 pub(crate) async fn build_request(
     client: &crate::baml_std::PrimitiveClient,
-    prompt: bex_vm_types::PromptAst,
+    prompt: &bex_vm_types::PromptAst,
 ) -> Result<crate::baml_std::HttpRequest, BuildRequestError> {
-    if client.url.is_empty() {
-        return Err(BuildRequestError::UnsupportedLlmProvider(
-            "aws-bedrock: region is required (set region or endpoint_url)".into(),
-        ));
-    }
-
     // Convert BAML prompt to SDK types.
-    let (system_blocks, messages) = prompt_to_sdk_types(&prompt, &client.default_role)?;
+    let (system_blocks, messages) = prompt_to_sdk_types(prompt, &client.default_role)?;
     let inference_config = build_inference_config(client)?;
     let additional_fields = collect_additional_fields(client);
 
@@ -379,9 +373,7 @@ fn media_to_content_block(
                 .source(img_source)
                 .build()
                 .map_err(|e| {
-                    BuildRequestError::UnsupportedMedia(format!(
-                        "failed to build image block: {e}"
-                    ))
+                    BuildRequestError::UnsupportedMedia(format!("failed to build image block: {e}"))
                 })?;
             Ok(vec![ContentBlock::Image(block)])
         }
@@ -398,9 +390,7 @@ fn media_to_content_block(
                 .source(vid_source)
                 .build()
                 .map_err(|e| {
-                    BuildRequestError::UnsupportedMedia(format!(
-                        "failed to build video block: {e}"
-                    ))
+                    BuildRequestError::UnsupportedMedia(format!("failed to build video block: {e}"))
                 })?;
             Ok(vec![ContentBlock::Video(block)])
         }
@@ -440,9 +430,7 @@ fn media_to_content_block(
                 .source(aud_source)
                 .build()
                 .map_err(|e| {
-                    BuildRequestError::UnsupportedMedia(format!(
-                        "failed to build audio block: {e}"
-                    ))
+                    BuildRequestError::UnsupportedMedia(format!("failed to build audio block: {e}"))
                 })?;
             Ok(vec![ContentBlock::Audio(block)])
         }
@@ -543,6 +531,7 @@ fn json_value_to_document(value: &serde_json::Value) -> Option<aws_smithy_types:
         serde_json::Value::Number(n) => {
             if let Some(i) = n.as_i64() {
                 if i >= 0 {
+                    #[allow(clippy::cast_sign_loss)]
                     Some(Document::Number(Number::PosInt(i as u64)))
                 } else {
                     Some(Document::Number(Number::NegInt(i)))
@@ -685,7 +674,7 @@ mod tests {
         client: &crate::baml_std::PrimitiveClient,
         prompt: Arc<PromptAst>,
     ) -> serde_json::Value {
-        let result = build_request(client, prompt).await.unwrap();
+        let result = build_request(client, &prompt).await.unwrap();
         serde_json::from_str(&result.body).unwrap()
     }
 
@@ -802,7 +791,7 @@ mod tests {
     #[tokio::test]
     async fn bedrock_url_contains_model_and_region() {
         let client = make_default_client();
-        let result = build_request(&client, msg("user", "hi")).await.unwrap();
+        let result = build_request(&client, &msg("user", "hi")).await.unwrap();
         assert_eq!(
             result.url,
             "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-haiku-20240307-v1:0/converse"
@@ -817,7 +806,7 @@ mod tests {
             "anthropic.claude-3-haiku-20240307-v1:0",
             vec![],
         );
-        let result = build_request(&client, msg("user", "hi")).await.unwrap();
+        let result = build_request(&client, &msg("user", "hi")).await.unwrap();
         assert_eq!(
             result.url,
             "http://localhost:4566/model/anthropic.claude-3-haiku-20240307-v1:0/converse"
@@ -1016,7 +1005,7 @@ mod tests {
                 base64_data: None,
             },
         );
-        let result = build_request(&client, prompt).await;
+        let result = build_request(&client, &prompt).await;
         assert!(result.is_err(), "non-s3 URLs should be rejected");
     }
 
@@ -1056,7 +1045,7 @@ mod tests {
             "anthropic.claude-3-haiku-20240307-v1:0",
             vec![],
         );
-        let result = build_request(&client, msg("user", "hi")).await.unwrap();
+        let result = build_request(&client, &msg("user", "hi")).await.unwrap();
         assert_eq!(
             result.url,
             "http://localhost:4566//model/anthropic.claude-3-haiku-20240307-v1:0/converse"
@@ -1071,29 +1060,8 @@ mod tests {
             "anthropic.claude-3-haiku-20240307-v1:0",
             vec![],
         );
-        let result = build_request(&client, msg("user", "hi")).await.unwrap();
+        let result = build_request(&client, &msg("user", "hi")).await.unwrap();
         assert!(result.url.starts_with("http://localhost:4566/"));
-    }
-
-    #[tokio::test]
-    async fn bedrock_missing_region_errors() {
-        let options = crate::baml_std::PrimitiveClientOptions {
-            model: Some("some-model".to_string()),
-            default_role: Some("user".to_string()),
-            ..Default::default()
-        };
-        let defaults = crate::baml_std::PrimitiveClientOptions::provider_defaults(
-            crate::LlmProvider::AwsBedrock,
-        );
-        let client = crate::baml_std::PrimitiveClient::new(
-            "test".to_string(),
-            "aws-bedrock".to_string(),
-            options.with_defaults(defaults),
-        )
-        .unwrap();
-        // URL is empty because no region or endpoint_url was set.
-        let result = build_request(&client, msg("user", "hi")).await;
-        assert!(result.is_err());
     }
 
     #[tokio::test]
@@ -1124,7 +1092,7 @@ mod tests {
             options.with_defaults(defaults),
         )
         .unwrap();
-        let result = build_request(&client, msg("user", "hi")).await;
+        let result = build_request(&client, &msg("user", "hi")).await;
         assert!(
             matches!(&result, Err(BuildRequestError::InvalidOption { key, .. }) if key == "max_tokens"),
             "expected InvalidOption for max_tokens, got: {result:?}"

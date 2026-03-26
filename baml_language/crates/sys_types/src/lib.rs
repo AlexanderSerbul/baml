@@ -748,11 +748,12 @@ fn convert_io_primitive_client(
         options,
     }: &io::owned::llm::PrimitiveClient,
 ) -> Result<sys_llm::baml_std::PrimitiveClient, sys_llm::baml_std::ClientError> {
-    let llm_provider = std::str::FromStr::from_str(provider.as_str())
-        .map_err(|_| sys_llm::baml_std::ClientError::UnknownProvider {
+    let llm_provider = std::str::FromStr::from_str(provider.as_str()).map_err(|_| {
+        sys_llm::baml_std::ClientError::UnknownProvider {
             client: name.clone(),
             provider: provider.clone(),
-        })?;
+        }
+    })?;
     let defaults = sys_llm::baml_std::PrimitiveClientOptions::provider_defaults(llm_provider);
     let user_options = sys_llm::baml_std::PrimitiveClientOptions {
         model: options.model.clone(),
@@ -779,28 +780,52 @@ fn convert_io_primitive_client(
 }
 
 /// Convert the IO-layer `provider_options` (`BexExternalValue` representing the
-/// `AnthropicOptions | AzureOpenAiOptions | null` union) into the strongly typed
-/// `sys_llm::baml_std::ProviderOptions` enum.
-fn convert_provider_options(
-    val: &BexExternalValue,
-) -> Option<sys_llm::baml_std::ProviderOptions> {
-    if let Ok(opts) = io::owned::llm::AnthropicOptions::from_external(val.clone()) {
-        return Some(sys_llm::baml_std::ProviderOptions::Anthropic(
-            sys_llm::baml_std::AnthropicOptions {
-                anthropic_version: opts.anthropic_version,
-            },
-        ));
+/// `AnthropicOptions | AzureOpenAiOptions | BedrockOptions | null` union) into
+/// the strongly typed `sys_llm::baml_std::ProviderOptions` enum.
+///
+/// Dispatches on `class_name` rather than trying `from_external` in order,
+/// because the generated `from_external` matches any `Instance` variant
+/// (ignoring `class_name`), so optional-field structs would incorrectly claim
+/// instances from other types.
+fn convert_provider_options(val: &BexExternalValue) -> Option<sys_llm::baml_std::ProviderOptions> {
+    let class_name = match val {
+        BexExternalValue::Instance { class_name, .. } => class_name.as_str(),
+        _ => return None,
+    };
+    match class_name {
+        "baml.llm.AnthropicOptions" => {
+            let opts = io::owned::llm::AnthropicOptions::from_external(val.clone()).ok()?;
+            Some(sys_llm::baml_std::ProviderOptions::Anthropic(
+                sys_llm::baml_std::AnthropicOptions {
+                    anthropic_version: opts.anthropic_version,
+                },
+            ))
+        }
+        "baml.llm.AzureOpenAiOptions" => {
+            let opts = io::owned::llm::AzureOpenAiOptions::from_external(val.clone()).ok()?;
+            Some(sys_llm::baml_std::ProviderOptions::AzureOpenAi(
+                sys_llm::baml_std::AzureOpenAiOptions {
+                    resource_name: opts.resource_name,
+                    deployment_id: opts.deployment_id,
+                    api_version: opts.api_version,
+                },
+            ))
+        }
+        "baml.llm.BedrockOptions" => {
+            let opts = io::owned::llm::BedrockOptions::from_external(val.clone()).ok()?;
+            Some(sys_llm::baml_std::ProviderOptions::Bedrock(
+                sys_llm::baml_std::BedrockOptions {
+                    region: opts.region,
+                    endpoint_url: opts.endpoint_url,
+                    access_key_id: opts.access_key_id,
+                    secret_access_key: opts.secret_access_key,
+                    session_token: opts.session_token,
+                    profile: opts.profile,
+                },
+            ))
+        }
+        _ => None,
     }
-    if let Ok(opts) = io::owned::llm::AzureOpenAiOptions::from_external(val.clone()) {
-        return Some(sys_llm::baml_std::ProviderOptions::AzureOpenAi(
-            sys_llm::baml_std::AzureOpenAiOptions {
-                resource_name: opts.resource_name,
-                deployment_id: opts.deployment_id,
-                api_version: opts.api_version,
-            },
-        ));
-    }
-    None
 }
 
 // ============================================================================

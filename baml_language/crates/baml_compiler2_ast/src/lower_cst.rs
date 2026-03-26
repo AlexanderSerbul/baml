@@ -892,13 +892,51 @@ fn synthesize_client_new_companion(
     let mut headers_expr = alloc(Expr::Map { entries: vec![] });
     let mut query_params_expr = alloc(Expr::Map { entries: vec![] });
 
-    // Provider-specific accumulators
-    let mut anthropic_version: Option<ExprId> = None;
-    let mut resource_name: Option<ExprId> = None;
-    let mut deployment_id: Option<ExprId> = None;
-    let mut api_version: Option<ExprId> = None;
+    /// Helper macro for provider-specific option groups.
+    ///
+    /// - `declare`: creates `Option<ExprId>` accumulators for each field.
+    /// - `try_set`: if `$key` matches any field name, lowers and stores it,
+    ///   evaluating to `true`. Otherwise evaluates to `false`.
+    /// - `build`: constructs a typed `Expr::Object` if any field was set.
+    macro_rules! provider_opts {
+        (declare $($field:ident),+ $(,)?) => {
+            $( let mut $field: Option<ExprId> = None; )+
+        };
+        (try_set $key:expr, $opt_item:expr, $alloc:expr, $($field:ident),+ $(,)?) => {
+            match $key {
+                $( stringify!($field) => {
+                    $field = Some(crate::lower_config_item::lower_config_value(
+                        &$opt_item, &mut $alloc,
+                    ));
+                    true
+                } )+
+                _ => false,
+            }
+        };
+        (build $alloc:expr, $type_name:expr, $($field:ident),+ $(,)?) => {
+            if $( $field.is_some() )||+ {
+                // Resolve defaults before the object alloc to avoid double &mut.
+                $( let $field = $field.unwrap_or_else(|| $alloc(Expr::Null)); )+
+                Some($alloc(Expr::Object {
+                    type_name: Some(Name::new($type_name)),
+                    fields: vec![
+                        $( (Name::new(stringify!($field)), $field), )+
+                    ],
+                    spreads: vec![],
+                }))
+            } else {
+                None
+            }
+        };
+    }
 
-    // Unknown keys → request_body
+    provider_opts!(declare anthropic_version);
+    provider_opts!(declare resource_name, deployment_id, api_version);
+    provider_opts!(declare
+        region, endpoint_url, access_key_id, secret_access_key, session_token, profile,
+    );
+
+    // Unknown keys -> request_body
     let mut request_body_entries: Vec<(ExprId, ExprId)> = vec![];
 
     // Walk the options nested block
@@ -911,7 +949,8 @@ fn synthesize_client_new_companion(
                 let Some(opt_key) = opt_item.key() else {
                     continue;
                 };
-                match opt_key.text() {
+                let key = opt_key.text();
+                match key {
                     // Named scalar fields
                     "model" => {
                         model = crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
@@ -949,28 +988,14 @@ fn synthesize_client_new_companion(
                         query_params_expr =
                             crate::lower_config_item::lower_config_value(&opt_item, &mut alloc);
                     }
-                    // Provider-specific keys
-                    "anthropic_version" => {
-                        anthropic_version = Some(crate::lower_config_item::lower_config_value(
-                            &opt_item, &mut alloc,
-                        ));
-                    }
-                    "resource_name" => {
-                        resource_name = Some(crate::lower_config_item::lower_config_value(
-                            &opt_item, &mut alloc,
-                        ));
-                    }
-                    "deployment_id" => {
-                        deployment_id = Some(crate::lower_config_item::lower_config_value(
-                            &opt_item, &mut alloc,
-                        ));
-                    }
-                    "api_version" => {
-                        api_version = Some(crate::lower_config_item::lower_config_value(
-                            &opt_item, &mut alloc,
-                        ));
-                    }
-                    // Unknown → request_body
+                    // Provider-specific keys -- try each group, fall through to request_body.
+                    _ if provider_opts!(try_set key, opt_item, alloc, anthropic_version) => {}
+                    _ if provider_opts!(try_set key, opt_item, alloc,
+                            resource_name, deployment_id, api_version) => {}
+                    _ if provider_opts!(try_set key, opt_item, alloc,
+                            region, endpoint_url, access_key_id, secret_access_key,
+                            session_token, profile) => {}
+                    // Unknown -> request_body
                     other => {
                         let key_expr = alloc(Expr::Literal(Literal::String(other.to_string())));
                         let val_expr =
@@ -982,29 +1007,20 @@ fn synthesize_client_new_companion(
         }
     }
 
-    // Build provider_options from accumulated provider-specific keys
-    let provider_options = if let Some(av) = anthropic_version {
-        alloc(Expr::Object {
-            type_name: Some(Name::new("baml.llm.AnthropicOptions")),
-            fields: vec![(Name::new("anthropic_version"), av)],
-            spreads: vec![],
-        })
-    } else if resource_name.is_some() || deployment_id.is_some() || api_version.is_some() {
-        let rn = resource_name.unwrap_or_else(|| alloc(Expr::Null));
-        let did = deployment_id.unwrap_or_else(|| alloc(Expr::Null));
-        let av = api_version.unwrap_or_else(|| alloc(Expr::Null));
-        alloc(Expr::Object {
-            type_name: Some(Name::new("baml.llm.AzureOpenAiOptions")),
-            fields: vec![
-                (Name::new("resource_name"), rn),
-                (Name::new("deployment_id"), did),
-                (Name::new("api_version"), av),
-            ],
-            spreads: vec![],
-        })
-    } else {
-        alloc(Expr::Null)
-    };
+    // Build provider_options from accumulated provider-specific keys.
+    // First match wins -- providers don't share option names.
+    let provider_options = provider_opts!(build alloc,
+            "baml.llm.AnthropicOptions", anthropic_version)
+    .or_else(|| {
+        provider_opts!(build alloc,
+            "baml.llm.AzureOpenAiOptions", resource_name, deployment_id, api_version)
+    })
+    .or_else(|| {
+        provider_opts!(build alloc,
+            "baml.llm.BedrockOptions",
+            region, endpoint_url, access_key_id, secret_access_key, session_token, profile)
+    })
+    .unwrap_or_else(|| alloc(Expr::Null));
 
     let request_body_expr = alloc(Expr::Map {
         entries: request_body_entries,
